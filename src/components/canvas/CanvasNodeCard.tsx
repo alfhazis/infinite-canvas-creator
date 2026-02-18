@@ -279,6 +279,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
 
   return (
     <motion.div
+      data-node-id={node.id}
       className={`absolute select-none ${isLocked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} ${isConnecting && connectingFromId !== node.id ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-[2.5rem]' : ''}`}
       style={{ left: node.x, top: node.y, width: node.width }}
       initial={{ scale: 0.8, opacity: 0 }}

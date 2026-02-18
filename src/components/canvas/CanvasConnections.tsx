@@ -1,11 +1,29 @@
 import { useCanvasStore } from '@/stores/canvasStore';
+import { useEffect, useState } from 'react';
 
 export const CanvasConnections = () => {
   const nodes = useCanvasStore((s) => s.nodes);
+  const [renderedHeights, setRenderedHeights] = useState<Record<string, number>>({});
+
+  // Observe actual rendered heights of node cards
+  useEffect(() => {
+    const measure = () => {
+      const heights: Record<string, number> = {};
+      nodes.forEach((node) => {
+        const el = document.querySelector(`[data-node-id="${node.id}"]`);
+        if (el) {
+          heights[node.id] = el.getBoundingClientRect().height;
+        }
+      });
+      setRenderedHeights(heights);
+    };
+    measure();
+    const timer = setInterval(measure, 500);
+    return () => clearInterval(timer);
+  }, [nodes]);
 
   const connections: { x1: number; y1: number; x2: number; y2: number; key: string }[] = [];
 
-  // Check if any nodes are picked
   const hasPickedNodes = nodes.some((n) => n.picked);
 
   nodes.forEach((node) => {
@@ -13,15 +31,16 @@ export const CanvasConnections = () => {
       const target = nodes.find((n) => n.id === targetId);
       if (!target) return;
 
-      // If any nodes are picked, only show lines to/from picked nodes
       if (hasPickedNodes && !node.picked && !target.picked) return;
 
-      // From right edge center of source
+      const sourceH = renderedHeights[node.id] || node.height || 300;
+      const targetH = renderedHeights[target.id] || target.height || 300;
+
+      // Right edge center of source → left edge center of target
       const x1 = node.x + node.width;
-      const y1 = node.y + (node.height || 150) / 2;
-      // To left edge center of target
+      const y1 = node.y + sourceH / 2;
       const x2 = target.x;
-      const y2 = target.y + (target.height || 150) / 2;
+      const y2 = target.y + targetH / 2;
 
       connections.push({ x1, y1, x2, y2, key: `${node.id}-${targetId}` });
     });
@@ -55,20 +74,11 @@ export const CanvasConnections = () => {
         const dur = `${Math.max(2.5, pathLen / 140)}s`;
         return (
           <g key={c.key}>
-            {/* Subtle glow */}
             <path d={path} fill="none" stroke="hsl(239 84% 67% / 0.04)" strokeWidth={8} filter="url(#conn-glow)" />
-            {/* Main line - 1px */}
             <path d={path} fill="none" stroke="url(#conn-gradient)" strokeWidth={1} markerEnd="url(#arrowhead)" strokeLinecap="round" />
-
-            {/* Single elegant animated dot */}
             <circle r="2.5" fill="hsl(239 84% 67% / 0.7)">
               <animateMotion dur={dur} repeatCount="indefinite" path={path} />
             </circle>
-
-            {/* Source port - minimal */}
-            <circle cx={c.x1} cy={c.y1} r="3" fill="hsl(239 84% 67% / 0.1)" stroke="hsl(239 84% 67% / 0.3)" strokeWidth={1} />
-            {/* Target port - minimal */}
-            <circle cx={c.x2} cy={c.y2} r="3" fill="hsl(270 80% 65% / 0.1)" stroke="hsl(270 80% 65% / 0.3)" strokeWidth={1} />
           </g>
         );
       })}
