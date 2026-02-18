@@ -1,5 +1,14 @@
 import { create } from 'zustand';
 
+export interface ElementLink {
+  /** CSS selector or data attribute identifying the element */
+  selector: string;
+  /** Label shown in the editor */
+  label: string;
+  /** Target node ID */
+  targetNodeId: string;
+}
+
 export interface CanvasNode {
   id: string;
   type: 'idea' | 'design' | 'code' | 'import';
@@ -22,6 +31,8 @@ export interface CanvasNode {
   tag?: string;
   /** platform target */
   platform?: 'web' | 'mobile';
+  /** element-to-node links within the visual editor */
+  elementLinks?: ElementLink[];
 }
 
 export interface UIVariation {
