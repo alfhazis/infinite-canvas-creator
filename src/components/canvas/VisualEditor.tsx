@@ -448,7 +448,23 @@ export const VisualEditor = ({ node, onClose }: Props) => {
           </div>
         )}
         {/* Canvas */}
-        <div className="flex-1 overflow-auto bg-secondary/20 flex items-center justify-center">
+        <div
+          className="flex-1 overflow-auto bg-secondary/20 flex items-center justify-center"
+          onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
+          onDrop={(e) => {
+            e.preventDefault();
+            const data = e.dataTransfer.getData('application/ve-element');
+            if (!data) return;
+            try {
+              const { tag, customHtml } = JSON.parse(data);
+              if (customHtml) {
+                iframeRef.current?.contentWindow?.postMessage({ type: 'insertElement', tag: 'custom', customHtml }, '*');
+              } else {
+                iframeRef.current?.contentWindow?.postMessage({ type: 'insertElement', tag }, '*');
+              }
+            } catch {}
+          }}
+        >
           <div
             className="bg-white rounded-xl shadow-2xl overflow-hidden transition-transform"
             style={{
