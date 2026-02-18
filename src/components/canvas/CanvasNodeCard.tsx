@@ -10,6 +10,7 @@ import {
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { generateFullPageVariations, getRandomVariation, generateSubSections } from './generateVariations';
 import { VisualEditor } from './VisualEditor';
+import { ApiVisualEditor } from './ApiVisualEditor';
 
 const typeConfig: Record<CanvasNode['type'], { icon: typeof Sparkles; gradient: string; label: string }> = {
   idea: { icon: Sparkles, gradient: 'from-indigo-500/20 to-violet-500/20', label: 'Idea' },
@@ -562,6 +563,11 @@ export const CanvasNodeCard = ({ node }: Props) => {
                     <Pencil className="w-4 h-4" />
                   </button>
                 )}
+                {node.type === 'api' && (node.content || node.generatedCode || node.status === 'ready') && (
+                  <button onMouseDown={(e) => e.stopPropagation()} onClick={handleVisualEdit} className="p-3 rounded-xl border border-rose-500/30 text-rose-400 hover:text-rose-300 hover:border-rose-500/50 hover:bg-rose-500/10 transition-all" title="API Builder">
+                    <Server className="w-4 h-4" />
+                  </button>
+                )}
 
                 {/* Delete */}
                 <button onClick={handleDelete} className="p-3 rounded-xl border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all" title="Delete">
@@ -584,7 +590,11 @@ export const CanvasNodeCard = ({ node }: Props) => {
       </div>
 
       {/* Visual Editor overlay - rendered via portal for true fullscreen */}
-      {showVisualEditor && createPortal(
+      {showVisualEditor && node.type === 'api' && createPortal(
+        <ApiVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
+        document.body
+      )}
+      {showVisualEditor && node.type !== 'api' && createPortal(
         <VisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
         document.body
       )}
