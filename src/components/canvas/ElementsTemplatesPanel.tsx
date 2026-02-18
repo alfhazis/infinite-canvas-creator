@@ -323,7 +323,12 @@ export const ElementsTemplatesPanel = ({ onInsertElement }: Props) => {
                   <button
                     key={item.label}
                     onClick={() => onInsertElement(item.tag, item.customHtml)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-secondary/80 transition-all group text-left"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('application/ve-element', JSON.stringify({ tag: item.tag, customHtml: item.customHtml || '' }));
+                      e.dataTransfer.effectAllowed = 'copy';
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-secondary/80 transition-all group text-left cursor-grab active:cursor-grabbing"
                   >
                     <div className="w-7 h-7 rounded-md bg-secondary/60 group-hover:bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
                       <item.icon className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -346,7 +351,12 @@ export const ElementsTemplatesPanel = ({ onInsertElement }: Props) => {
                   <button
                     key={item.label}
                     onClick={() => onInsertElement('template', item.html)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-all group text-left"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('application/ve-element', JSON.stringify({ tag: 'template', customHtml: item.html }));
+                      e.dataTransfer.effectAllowed = 'copy';
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-secondary/80 transition-all group text-left cursor-grab active:cursor-grabbing"
                   >
                     <div className="w-8 h-8 rounded-md bg-secondary/60 group-hover:bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
                       <item.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
