@@ -5,7 +5,7 @@ import {
   Sparkles, Code, FileCode, Upload, Play, Trash2, Monitor, Star,
   Edit3, Check, X, Copy, Tag, RefreshCw,
   MoreHorizontal, Lock, Unlock, Minimize2, Maximize2, ChevronDown,
-  Smartphone, Globe, ArrowRight, Layers, Pencil, Server, MonitorDot, Terminal, Database, Code2
+  Smartphone, Globe, ArrowRight, Layers, Pencil, Server, MonitorDot, Terminal, Database, Code2, Link2
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { generateFullPageVariations, getRandomVariation, generateSubSections } from './generateVariations';
@@ -289,6 +289,41 @@ export const CanvasNodeCard = ({ node }: Props) => {
     >
       <div className={`node-card p-5 relative ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${node.picked ? 'ring-2 ring-emerald-500/60 ring-offset-2 ring-offset-background' : ''}`}>
         
+        {/* Connection handles - left */}
+        <button
+          className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 transition-all z-20 ${
+            connectingFromId === node.id
+              ? 'bg-primary border-primary scale-125 shadow-lg shadow-primary/30'
+              : connectingFromId
+              ? 'bg-primary/60 border-primary animate-pulse hover:scale-150'
+              : 'bg-card border-border hover:border-primary hover:bg-primary/20 hover:scale-125'
+          }`}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (connectingFromId && connectingFromId !== node.id) { finishConnecting(node.id); }
+            else if (!connectingFromId) { startConnecting(node.id); }
+          }}
+          title={connectingFromId ? 'Click to connect here' : 'Drag to connect'}
+        />
+        {/* Connection handles - right */}
+        <button
+          className={`absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 transition-all z-20 ${
+            connectingFromId === node.id
+              ? 'bg-primary border-primary scale-125 shadow-lg shadow-primary/30'
+              : connectingFromId
+              ? 'bg-primary/60 border-primary animate-pulse hover:scale-150'
+              : 'bg-card border-border hover:border-primary hover:bg-primary/20 hover:scale-125'
+          }`}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (connectingFromId && connectingFromId !== node.id) { finishConnecting(node.id); }
+            else if (!connectingFromId) { startConnecting(node.id); }
+          }}
+          title={connectingFromId ? 'Click to connect here' : 'Drag to connect'}
+        />
+
         {/* Badges */}
         {node.picked && (
           <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg z-10">
