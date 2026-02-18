@@ -1,4 +1,5 @@
 import { useCallback, useState, useRef, useEffect, type MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles, Code, FileCode, Upload, Play, Trash2, Monitor, Star,
@@ -544,9 +545,10 @@ export const CanvasNodeCard = ({ node }: Props) => {
         )}
       </div>
 
-      {/* Visual Editor overlay */}
-      {showVisualEditor && (
-        <VisualEditor node={node} onClose={() => setShowVisualEditor(false)} />
+      {/* Visual Editor overlay - rendered via portal for true fullscreen */}
+      {showVisualEditor && createPortal(
+        <VisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
+        document.body
       )}
     </motion.div>
   );
