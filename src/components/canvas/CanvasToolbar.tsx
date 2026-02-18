@@ -315,53 +315,53 @@ export const CanvasToolbar = () => {
         </div>
       </motion.div>
 
+      {/* ─── Idea input panel (above toolbar) ─── */}
+      <AnimatePresence>
+        {showIdeaInput && (
+          <motion.div
+            className="fixed bottom-24 left-0 right-0 flex justify-center z-20"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+          >
+            <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/95 backdrop-blur-xl border border-border shadow-2xl shadow-primary/5 w-[600px]">
+              <textarea
+                autoFocus
+                value={ideaText}
+                onChange={(e) => setIdeaText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddIdea(); }
+                  if (e.key === 'Escape') { setShowIdeaInput(false); setIdeaText(''); }
+                }}
+                placeholder="Describe your idea... (Shift+Enter for new line)"
+                className="brand-input w-full !py-3 !rounded-xl resize-none text-sm"
+                rows={4}
+              />
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={() => { setShowIdeaInput(false); setIdeaText(''); }}
+                  className="px-4 py-2 rounded-xl text-muted-foreground hover:text-foreground text-[10px] font-black uppercase tracking-widest transition-colors"
+                >
+                  Cancel
+                </button>
+                <button onClick={handleAddIdea} className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">
+                  Create
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ─── Bottom center: main action dock ─── */}
       <motion.div
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20"
+        className="fixed bottom-8 left-0 right-0 flex justify-center z-20"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.15 }}
       >
         <div className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-card/90 backdrop-blur-xl border border-border shadow-2xl shadow-primary/5">
-          {/* Idea input or button */}
-          <AnimatePresence mode="wait">
-            {showIdeaInput ? (
-              <motion.div
-                key="input"
-                className="flex items-start gap-2"
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: 'auto', opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-              >
-                <textarea
-                  autoFocus
-                  value={ideaText}
-                  onChange={(e) => setIdeaText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddIdea(); }
-                    if (e.key === 'Escape') { setShowIdeaInput(false); setIdeaText(''); }
-                  }}
-                  placeholder="Describe your idea... (Shift+Enter for new line)"
-                  className="brand-input w-[420px] !py-2.5 !rounded-xl resize-none"
-                  rows={3}
-                />
-                <button onClick={handleAddIdea} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all whitespace-nowrap">
-                  Create
-                </button>
-                <button
-                  onClick={() => { setShowIdeaInput(false); setIdeaText(''); }}
-                  className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <Divider />
-              </motion.div>
-            ) : (
-              <motion.div key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <ToolButton icon={Sparkles} label="New Idea (N)" onClick={() => setShowIdeaInput(true)} accent />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <ToolButton icon={Sparkles} label="New Idea (N)" onClick={() => setShowIdeaInput(true)} accent />
 
           <ToolButton icon={Upload} label="Import Files" onClick={() => fileInputRef.current?.click()} />
 
