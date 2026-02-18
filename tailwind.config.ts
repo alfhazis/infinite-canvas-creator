@@ -57,6 +57,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        canvas: {
+          bg: "hsl(var(--canvas-bg))",
+          grid: "hsl(var(--canvas-grid))",
+          node: "hsl(var(--canvas-node-bg))",
+          "node-border": "hsl(var(--canvas-node-border))",
+          accent: "hsl(var(--canvas-accent))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +72,22 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 20px hsl(239 84% 67% / 0.2)" },
+          "50%": { boxShadow: "0 0 40px hsl(239 84% 67% / 0.4)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },
