@@ -25,10 +25,13 @@ interface CanvasState {
   isDragging: boolean;
   dragNodeId: string | null;
   dragOffset: { x: number; y: number };
+  darkMode: boolean;
 
   addNode: (node: Omit<CanvasNode, 'id' | 'connectedTo'>) => string;
   updateNode: (id: string, updates: Partial<CanvasNode>) => void;
   removeNode: (id: string) => void;
+  duplicateNode: (id: string) => void;
+  clearAll: () => void;
   selectNode: (id: string | null) => void;
   setZoom: (zoom: number) => void;
   setPan: (x: number, y: number) => void;
@@ -36,6 +39,7 @@ interface CanvasState {
   drag: (x: number, y: number) => void;
   endDrag: () => void;
   connectNodes: (fromId: string, toId: string) => void;
+  toggleDarkMode: () => void;
 }
 
 let nodeCounter = 0;
@@ -49,6 +53,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   isDragging: false,
   dragNodeId: null,
   dragOffset: { x: 0, y: 0 },
+  darkMode: false,
 
   addNode: (node) => {
     const id = `node-${++nodeCounter}-${Date.now()}`;
@@ -103,4 +108,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           : n
       ),
     })),
+
+  duplicateNode: (id) => {
+    const { nodes } = get();
+    const source = nodes.find((n) => n.id === id);
+    if (!source) return;
+    const newId = `node-${++nodeCounter}-${Date.now()}`;
+    set((state) => ({
+      nodes: [...state.nodes, { ...source, id: newId, x: source.x + 40, y: source.y + 40, connectedTo: [] }],
+    }));
+  },
+
+  clearAll: () => set({ nodes: [], selectedNodeId: null }),
+
+  toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
 }));

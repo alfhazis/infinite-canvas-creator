@@ -1,18 +1,144 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles, Upload, ZoomIn, ZoomOut, Maximize2,
-  Search, Plus, X, FileCode, Layers
+  Search, X, Layers, Moon, Sun, Copy, Trash2,
+  Code, FileCode, Grid3X3, Keyboard, Download, Eye
 } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvasStore';
 
+/* ── Minimap ────────────────────────────────── */
+const Minimap = () => {
+  const { nodes, panX, panY, zoom, setPan } = useCanvasStore();
+  if (nodes.length === 0) return null;
+
+  const minX = Math.min(...nodes.map((n) => n.x)) - 100;
+  const minY = Math.min(...nodes.map((n) => n.y)) - 100;
+  const maxX = Math.max(...nodes.map((n) => n.x + n.width)) + 100;
+  const maxY = Math.max(...nodes.map((n) => n.y + n.height)) + 100;
+  const w = maxX - minX || 1;
+  const h = maxY - minY || 1;
+  const scale = Math.min(160 / w, 100 / h);
+
+  const vpW = window.innerWidth / zoom;
+  const vpH = window.innerHeight / zoom;
+  const vpX = (-panX / zoom - minX) * scale;
+  const vpY = (-panY / zoom - minY) * scale;
+
+  return (
+    <motion.div
+      className="absolute bottom-20 right-6 z-30 rounded-2xl bg-card/90 backdrop-blur border border-border p-2 overflow-hidden cursor-pointer"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      onClick={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const cx = (e.clientX - rect.left - 8) / scale + minX;
+        const cy = (e.clientY - rect.top - 8) / scale + minY;
+        setPan(-cx * zoom + window.innerWidth / 2, -cy * zoom + window.innerHeight / 2);
+      }}
+      style={{ width: w * scale + 16, height: h * scale + 16 }}
+    >
+      {nodes.map((n) => (
+        <div
+          key={n.id}
+          className="absolute rounded-sm bg-primary/40"
+          style={{
+            left: (n.x - minX) * scale,
+            top: (n.y - minY) * scale,
+            width: n.width * scale,
+            height: (n.height || 200) * scale,
+          }}
+        />
+      ))}
+      <div
+        className="absolute border-2 border-primary/60 rounded-sm"
+        style={{ left: vpX, top: vpY, width: vpW * scale, height: vpH * scale }}
+      />
+    </motion.div>
+  );
+};
+
+/* ── Shortcuts modal ───────────────────────── */
+const ShortcutsModal = ({ onClose }: { onClose: () => void }) => (
+  <motion.div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    onClick={onClose}
+  >
+    <motion.div
+      className="node-card p-8 w-[420px]"
+      initial={{ scale: 0.9 }}
+      animate={{ scale: 1 }}
+      exit={{ scale: 0.9 }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-black tracking-tight uppercase text-foreground">Shortcuts</h2>
+        <button onClick={onClose} className="p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="space-y-3">
+        {[
+          ['Scroll', 'Pan canvas'],
+          ['Ctrl/⌘ + Scroll', 'Zoom in/out'],
+          ['Alt + Drag', 'Pan canvas'],
+          ['N', 'New idea node'],
+          ['D', 'Toggle dark mode'],
+          ['Delete / Backspace', 'Delete selected'],
+          ['Ctrl/⌘ + D', 'Duplicate selected'],
+          ['Escape', 'Deselect'],
+        ].map(([key, desc]) => (
+          <div key={key} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+            <span className="brand-description">{desc}</span>
+            <kbd className="px-2.5 py-1 rounded-lg bg-secondary border border-border text-[10px] font-black tracking-wider text-muted-foreground">{key}</kbd>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  </motion.div>
+);
+
+/* ── Main Toolbar ──────────────────────────── */
 export const CanvasToolbar = () => {
-  const { addNode, zoom, setZoom, setPan, nodes } = useCanvasStore();
+  const {
+    addNode, zoom, setZoom, setPan, nodes,
+    selectedNodeId, duplicateNode, removeNode, clearAll,
+    darkMode, toggleDarkMode,
+  } = useCanvasStore();
+
   const [showIdeaInput, setShowIdeaInput] = useState(false);
   const [ideaText, setIdeaText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMinimap, setShowMinimap] = useState(true);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showNodeTypes, setShowNodeTypes] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Apply dark mode to html
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      if (e.key === 'n' || e.key === 'N') { setShowIdeaInput(true); e.preventDefault(); }
+      if (e.key === 'd' && !e.ctrlKey && !e.metaKey) { toggleDarkMode(); }
+      if (e.key === 'd' && (e.ctrlKey || e.metaKey) && selectedNodeId) { e.preventDefault(); duplicateNode(selectedNodeId); }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) { removeNode(selectedNodeId); }
+      if (e.key === 'Escape') { useCanvasStore.getState().selectNode(null); setShowSearch(false); setShowIdeaInput(false); }
+      if (e.key === '/' || (e.key === 'f' && (e.ctrlKey || e.metaKey))) { e.preventDefault(); setShowSearch(true); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedNodeId, duplicateNode, removeNode, toggleDarkMode]);
 
   const handleAddIdea = useCallback(() => {
     if (!ideaText.trim()) return;
@@ -32,6 +158,23 @@ export const CanvasToolbar = () => {
     setIdeaText('');
     setShowIdeaInput(false);
   }, [ideaText, nodes.length, addNode]);
+
+  const handleAddTypedNode = useCallback((type: 'design' | 'code') => {
+    const nodeCount = nodes.length;
+    const col = nodeCount % 3;
+    const row = Math.floor(nodeCount / 3);
+    addNode({
+      type,
+      title: type === 'design' ? 'New Design' : 'New Code Block',
+      description: type === 'design' ? 'An empty design node. Connect it to ideas or write your own.' : 'An empty code node for custom scripts and components.',
+      x: 100 + col * 420,
+      y: 100 + row * 400,
+      width: 360,
+      height: 300,
+      status: 'idle',
+    });
+    setShowNodeTypes(false);
+  }, [nodes.length, addNode]);
 
   const handleFileImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,20 +208,51 @@ export const CanvasToolbar = () => {
     [nodes.length, addNode]
   );
 
+  const handleExport = useCallback(() => {
+    const data = JSON.stringify(nodes, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'canvas-nodes.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [nodes]);
+
   const filteredNodes = searchQuery
     ? nodes.filter((n) => n.title.toLowerCase().includes(searchQuery.toLowerCase()))
     : [];
 
+  const ToolButton = ({ icon: I, label, onClick, active, accent }: {
+    icon: typeof Sparkles; label: string; onClick: () => void; active?: boolean; accent?: boolean;
+  }) => (
+    <button
+      onClick={onClick}
+      className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all
+        ${accent ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
+        ${active ? 'bg-secondary text-foreground' : ''}
+        ${!accent && !active ? 'text-muted-foreground hover:text-foreground hover:bg-secondary/80' : ''}
+      `}
+      title={label}
+    >
+      <I className="w-4 h-4" />
+      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-foreground text-background text-[9px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        {label}
+      </span>
+    </button>
+  );
+
+  const Divider = () => <div className="w-px h-6 bg-border" />;
+
   return (
     <>
-      {/* Top bar */}
+      {/* ─── Top center: title + search ─── */}
       <motion.div
-        className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
+        className="fixed top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
       >
-        {/* Logo / Title */}
         <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card border border-border">
           <Layers className="w-5 h-5 text-primary" />
           <span className="text-[10px] font-black uppercase tracking-widest text-foreground">
@@ -100,7 +274,7 @@ export const CanvasToolbar = () => {
           <AnimatePresence>
             {showSearch && (
               <motion.div
-                className="absolute top-full mt-2 left-0 w-72"
+                className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-80"
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
@@ -109,7 +283,7 @@ export const CanvasToolbar = () => {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search nodes..."
+                  placeholder="Search nodes... (press / )"
                   className="brand-input"
                 />
                 {filteredNodes.length > 0 && (
@@ -135,95 +309,141 @@ export const CanvasToolbar = () => {
             )}
           </AnimatePresence>
         </div>
+      </motion.div>
 
-        {/* Zoom controls */}
-        <div className="flex items-center gap-1 px-2 py-1 rounded-2xl bg-card border border-border">
-          <button
-            onClick={() => setZoom(zoom - 0.1)}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => { setZoom(1); setPan(0, 0); }}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Maximize2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setZoom(zoom + 0.1)}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </button>
+      {/* ─── Bottom center: main action dock ─── */}
+      <motion.div
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.15 }}
+      >
+        <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-card/90 backdrop-blur-xl border border-border shadow-lg">
+          {/* Idea input or button */}
+          <AnimatePresence mode="wait">
+            {showIdeaInput ? (
+              <motion.div
+                key="input"
+                className="flex items-center gap-2"
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 'auto', opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+              >
+                <input
+                  autoFocus
+                  value={ideaText}
+                  onChange={(e) => setIdeaText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddIdea();
+                    if (e.key === 'Escape') { setShowIdeaInput(false); setIdeaText(''); }
+                  }}
+                  placeholder="Describe your idea..."
+                  className="brand-input w-72 !py-2 !rounded-xl"
+                />
+                <button onClick={handleAddIdea} className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">
+                  Create
+                </button>
+                <button
+                  onClick={() => { setShowIdeaInput(false); setIdeaText(''); }}
+                  className="p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <Divider />
+              </motion.div>
+            ) : (
+              <motion.div key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <ToolButton icon={Sparkles} label="New Idea (N)" onClick={() => setShowIdeaInput(true)} accent />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Node types dropdown */}
+          <div className="relative">
+            <ToolButton icon={Grid3X3} label="Node Types" onClick={() => setShowNodeTypes(!showNodeTypes)} active={showNodeTypes} />
+            <AnimatePresence>
+              {showNodeTypes && (
+                <motion.div
+                  className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 rounded-2xl bg-card border border-border p-2"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                >
+                  <button onClick={() => handleAddTypedNode('design')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors">
+                    <Code className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs font-bold text-foreground">Design Node</span>
+                  </button>
+                  <button onClick={() => handleAddTypedNode('code')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors">
+                    <FileCode className="w-4 h-4 text-amber-500" />
+                    <span className="text-xs font-bold text-foreground">Code Node</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <ToolButton icon={Upload} label="Import Files" onClick={() => fileInputRef.current?.click()} />
+
+          <Divider />
+
+          {/* Selection-dependent actions */}
+          <ToolButton
+            icon={Copy}
+            label="Duplicate (⌘D)"
+            onClick={() => selectedNodeId && duplicateNode(selectedNodeId)}
+          />
+          <ToolButton
+            icon={Trash2}
+            label="Delete (Del)"
+            onClick={() => selectedNodeId && removeNode(selectedNodeId)}
+          />
+
+          <Divider />
+
+          {/* Zoom */}
+          <ToolButton icon={ZoomOut} label="Zoom Out" onClick={() => setZoom(zoom - 0.15)} />
+          <span className="text-[10px] font-black text-muted-foreground w-10 text-center tabular-nums">{Math.round(zoom * 100)}%</span>
+          <ToolButton icon={ZoomIn} label="Zoom In" onClick={() => setZoom(zoom + 0.15)} />
+          <ToolButton icon={Maximize2} label="Reset View" onClick={() => { setZoom(1); setPan(0, 0); }} />
+
+          <Divider />
+
+          {/* Utilities */}
+          <ToolButton icon={Eye} label="Minimap" onClick={() => setShowMinimap(!showMinimap)} active={showMinimap} />
+          <ToolButton icon={darkMode ? Sun : Moon} label="Theme (D)" onClick={toggleDarkMode} />
+          <ToolButton icon={Download} label="Export JSON" onClick={handleExport} />
+          <ToolButton icon={Keyboard} label="Shortcuts" onClick={() => setShowShortcuts(true)} />
         </div>
       </motion.div>
 
-      {/* Bottom action bar */}
-      <motion.div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <AnimatePresence>
-          {showIdeaInput && (
-            <motion.div
-              className="flex items-center gap-2"
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 'auto', opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-            >
-              <input
-                autoFocus
-                value={ideaText}
-                onChange={(e) => setIdeaText(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddIdea()}
-                placeholder="Describe your idea..."
-                className="brand-input w-80"
-              />
-              <button onClick={handleAddIdea} className="brand-button w-auto px-6">
-                Create
-              </button>
-              <button
-                onClick={() => { setShowIdeaInput(false); setIdeaText(''); }}
-                className="p-3.5 rounded-xl border border-border text-muted-foreground hover:text-foreground transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* Minimap */}
+      {showMinimap && <Minimap />}
 
-        {!showIdeaInput && (
-          <>
-            <button
-              onClick={() => setShowIdeaInput(true)}
-              className="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all animate-pulse-glow"
-            >
-              <Sparkles className="w-4 h-4" />
-              New Idea
-            </button>
+      {/* Shortcuts modal */}
+      <AnimatePresence>
+        {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
+      </AnimatePresence>
 
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-card border border-border text-foreground text-[10px] font-black uppercase tracking-widest hover:border-primary/30 transition-all"
-            >
-              <Upload className="w-4 h-4" />
-              Import Files
-            </button>
-          </>
-        )}
+      {/* Clear all */}
+      {nodes.length > 0 && (
+        <motion.button
+          className="fixed top-6 right-6 z-20 px-4 py-2.5 rounded-2xl bg-card border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 text-[10px] font-black uppercase tracking-widest transition-all"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={clearAll}
+        >
+          Clear All
+        </motion.button>
+      )}
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".ts,.tsx,.css"
-          multiple
-          className="hidden"
-          onChange={handleFileImport}
-        />
-      </motion.div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".ts,.tsx,.css,.json,.html"
+        multiple
+        className="hidden"
+        onChange={handleFileImport}
+      />
     </>
   );
 };
