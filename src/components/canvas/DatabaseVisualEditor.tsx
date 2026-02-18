@@ -293,9 +293,50 @@ const dbElements: DbElement[] = [
     defaultCol('price', 'number', { isNullable: false }), defaultCol('variants', 'array'),
     defaultCol('attributes', 'map'), defaultCol('images', 'array'),
   ] } },
+  { id: 'nosql-orders', label: 'Orders', icon: Receipt, category: 'NoSQL Collections', engine: 'nosql', createTable: { name: 'orders', kind: 'collection', columns: [
+    defaultCol('_id', 'objectId', { isPrimary: true, isNullable: false }), defaultCol('userId', 'reference', { isNullable: false }),
+    defaultCol('items', 'array', { isNullable: false }), defaultCol('total', 'number', { isNullable: false }),
+    defaultCol('status', 'string', { defaultValue: "'pending'" }), defaultCol('shippingAddress', 'object'),
+    defaultCol('createdAt', 'date', { defaultValue: 'new Date()' }),
+  ] } },
+  { id: 'nosql-comments', label: 'Comments', icon: MessageSquare, category: 'NoSQL Collections', engine: 'nosql', createTable: { name: 'comments', kind: 'collection', columns: [
+    defaultCol('_id', 'objectId', { isPrimary: true, isNullable: false }), defaultCol('postId', 'reference', { isNullable: false }),
+    defaultCol('userId', 'reference'), defaultCol('text', 'string', { isNullable: false }),
+    defaultCol('replies', 'array'), defaultCol('createdAt', 'date'),
+  ] } },
+  { id: 'nosql-notifications', label: 'Notifications', icon: Bell, category: 'NoSQL Collections', engine: 'nosql', createTable: { name: 'notifications', kind: 'collection', columns: [
+    defaultCol('_id', 'objectId', { isPrimary: true, isNullable: false }), defaultCol('userId', 'reference', { isNullable: false }),
+    defaultCol('type', 'string', { isNullable: false }), defaultCol('payload', 'object'),
+    defaultCol('read', 'boolean', { defaultValue: 'false' }), defaultCol('createdAt', 'date'),
+  ] } },
+  { id: 'nosql-chats', label: 'Chat Messages', icon: MessageSquare, category: 'NoSQL Collections', engine: 'nosql', createTable: { name: 'messages', kind: 'collection', columns: [
+    defaultCol('_id', 'objectId', { isPrimary: true, isNullable: false }), defaultCol('roomId', 'reference', { isNullable: false }),
+    defaultCol('senderId', 'reference'), defaultCol('text', 'string'), defaultCol('attachments', 'array'),
+    defaultCol('readBy', 'array'), defaultCol('sentAt', 'date'),
+  ] } },
+  { id: 'nosql-analytics', label: 'Analytics Events', icon: Activity, category: 'NoSQL Collections', engine: 'nosql', createTable: { name: 'analytics', kind: 'collection', columns: [
+    defaultCol('_id', 'objectId', { isPrimary: true, isNullable: false }), defaultCol('event', 'string', { isNullable: false }),
+    defaultCol('userId', 'reference'), defaultCol('properties', 'map'),
+    defaultCol('timestamp', 'date', { defaultValue: 'new Date()' }),
+  ] } },
+  { id: 'nosql-settings', label: 'App Settings', icon: Settings, category: 'NoSQL Collections', engine: 'nosql', createTable: { name: 'settings', kind: 'collection', columns: [
+    defaultCol('_id', 'objectId', { isPrimary: true, isNullable: false }), defaultCol('key', 'string', { isNullable: false, isUnique: true }),
+    defaultCol('value', 'object', { isNullable: false }), defaultCol('scope', 'string', { defaultValue: "'global'" }),
+  ] } },
   { id: 'nosql-empty', label: 'Empty Collection', icon: Square, category: 'NoSQL Collections', engine: 'nosql', createTable: { name: 'new_collection', kind: 'collection', columns: [
     defaultCol('_id', 'objectId', { isPrimary: true, isNullable: false }),
   ] } },
+
+  // ── NoSQL Columns ──
+  { id: 'nosql-col-objectId', label: 'ObjectId', icon: Key, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('_id', 'objectId') },
+  { id: 'nosql-col-string', label: 'String', icon: Type, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('field', 'string') },
+  { id: 'nosql-col-number', label: 'Number', icon: Hash, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('count', 'number') },
+  { id: 'nosql-col-boolean', label: 'Boolean', icon: ToggleLeft, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('flag', 'boolean', { defaultValue: 'false' }) },
+  { id: 'nosql-col-object', label: 'Object', icon: Braces, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('data', 'object') },
+  { id: 'nosql-col-array', label: 'Array', icon: List, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('items', 'array') },
+  { id: 'nosql-col-map', label: 'Map', icon: Braces, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('metadata', 'map') },
+  { id: 'nosql-col-ref', label: 'Reference', icon: Link2, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('ref_id', 'reference') },
+  { id: 'nosql-col-date', label: 'Date', icon: Calendar, category: 'NoSQL Fields', engine: 'nosql', createColumn: defaultCol('createdAt', 'date') },
 
   // ══════════ Vector Templates ══════════
   { id: 'vec-embeddings', label: 'Embeddings', icon: Hexagon, category: 'Vector Indexes', engine: 'vector', createTable: { name: 'embeddings', kind: 'index', columns: [
@@ -313,9 +354,31 @@ const dbElements: DbElement[] = [
     defaultCol('embedding', 'vector', { isNullable: false, dimension: 512 }),
     defaultCol('labels', 'array'), defaultCol('metadata', 'metadata'),
   ] } },
+  { id: 'vec-qa', label: 'Q&A Pairs', icon: MessageSquare, category: 'Vector Indexes', engine: 'vector', createTable: { name: 'qa_pairs', kind: 'index', columns: [
+    defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('question', 'text', { isNullable: false }),
+    defaultCol('answer', 'text', { isNullable: false }), defaultCol('q_embedding', 'vector', { isNullable: false, dimension: 1536 }),
+    defaultCol('category', 'text'), defaultCol('metadata', 'metadata'),
+  ] } },
+  { id: 'vec-products', label: 'Product Search', icon: ShoppingCart, category: 'Vector Indexes', engine: 'vector', createTable: { name: 'product_search', kind: 'index', columns: [
+    defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('name', 'text', { isNullable: false }),
+    defaultCol('description', 'text'), defaultCol('embedding', 'vector', { isNullable: false, dimension: 768 }),
+    defaultCol('price', 'float'), defaultCol('metadata', 'metadata'),
+  ] } },
+  { id: 'vec-code', label: 'Code Snippets', icon: FileJson, category: 'Vector Indexes', engine: 'vector', createTable: { name: 'code_snippets', kind: 'index', columns: [
+    defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('code', 'text', { isNullable: false }),
+    defaultCol('language', 'text'), defaultCol('embedding', 'vector', { isNullable: false, dimension: 1536 }),
+    defaultCol('file_path', 'text'), defaultCol('metadata', 'metadata'),
+  ] } },
   { id: 'vec-empty', label: 'Empty Index', icon: Square, category: 'Vector Indexes', engine: 'vector', createTable: { name: 'new_index', kind: 'index', columns: [
     defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('embedding', 'vector', { isNullable: false, dimension: 1536 }),
   ] } },
+
+  // ── Vector Columns ──
+  { id: 'vec-col-vector', label: 'Vector', icon: Hexagon, category: 'Vector Fields', engine: 'vector', createColumn: defaultCol('embedding', 'vector', { dimension: 1536 }) },
+  { id: 'vec-col-sparse', label: 'Sparse Vector', icon: Hexagon, category: 'Vector Fields', engine: 'vector', createColumn: defaultCol('sparse', 'sparse_vector') },
+  { id: 'vec-col-meta', label: 'Metadata', icon: Braces, category: 'Vector Fields', engine: 'vector', createColumn: defaultCol('metadata', 'metadata') },
+  { id: 'vec-col-text', label: 'Text', icon: Type, category: 'Vector Fields', engine: 'vector', createColumn: defaultCol('content', 'text') },
+  { id: 'vec-col-float', label: 'Float', icon: Hash, category: 'Vector Fields', engine: 'vector', createColumn: defaultCol('score', 'float') },
 
   // ══════════ Graph Templates ══════════
   { id: 'graph-person', label: 'Person Node', icon: Users, category: 'Graph Nodes', engine: 'graph', createTable: { name: 'Person', kind: 'node', columns: [
@@ -327,50 +390,128 @@ const dbElements: DbElement[] = [
     defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('name', 'text', { isNullable: false }),
     defaultCol('industry', 'text'), defaultCol('founded', 'integer'),
   ] } },
-  { id: 'graph-works-at', label: 'WORKS_AT Edge', icon: Network, category: 'Graph Edges', engine: 'graph', createTable: { name: 'WORKS_AT', kind: 'edge', columns: [
-    defaultCol('from', 'relationship', { isNullable: false }), defaultCol('to', 'relationship', { isNullable: false }),
-    defaultCol('since', 'date'), defaultCol('role', 'text'),
+  { id: 'graph-product', label: 'Product Node', icon: ShoppingCart, category: 'Graph Nodes', engine: 'graph', createTable: { name: 'Product', kind: 'node', columns: [
+    defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('name', 'text', { isNullable: false }),
+    defaultCol('category', 'text'), defaultCol('price', 'float'),
   ] } },
-  { id: 'graph-knows', label: 'KNOWS Edge', icon: Network, category: 'Graph Edges', engine: 'graph', createTable: { name: 'KNOWS', kind: 'edge', columns: [
-    defaultCol('from', 'relationship', { isNullable: false }), defaultCol('to', 'relationship', { isNullable: false }),
-    defaultCol('weight', 'float', { defaultValue: '1.0' }),
+  { id: 'graph-location', label: 'Location Node', icon: MapPinned, category: 'Graph Nodes', engine: 'graph', createTable: { name: 'Location', kind: 'node', columns: [
+    defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('name', 'text', { isNullable: false }),
+    defaultCol('lat', 'float'), defaultCol('lng', 'float'), defaultCol('type', 'text'),
+  ] } },
+  { id: 'graph-event', label: 'Event Node', icon: Calendar, category: 'Graph Nodes', engine: 'graph', createTable: { name: 'Event', kind: 'node', columns: [
+    defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('name', 'text', { isNullable: false }),
+    defaultCol('date', 'date'), defaultCol('description', 'text'),
+  ] } },
+  { id: 'graph-tag', label: 'Tag Node', icon: Tag, category: 'Graph Nodes', engine: 'graph', createTable: { name: 'Tag', kind: 'node', columns: [
+    defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }), defaultCol('name', 'text', { isNullable: false, isUnique: true }),
   ] } },
   { id: 'graph-empty-node', label: 'Empty Node', icon: Square, category: 'Graph Nodes', engine: 'graph', createTable: { name: 'NewNode', kind: 'node', columns: [
     defaultCol('id', 'uuid', { isPrimary: true, isNullable: false }),
   ] } },
 
+  // ── Graph Edges ──
+  { id: 'graph-works-at', label: 'WORKS_AT', icon: Network, category: 'Graph Edges', engine: 'graph', createTable: { name: 'WORKS_AT', kind: 'edge', columns: [
+    defaultCol('from', 'relationship', { isNullable: false }), defaultCol('to', 'relationship', { isNullable: false }),
+    defaultCol('since', 'date'), defaultCol('role', 'text'),
+  ] } },
+  { id: 'graph-knows', label: 'KNOWS', icon: Network, category: 'Graph Edges', engine: 'graph', createTable: { name: 'KNOWS', kind: 'edge', columns: [
+    defaultCol('from', 'relationship', { isNullable: false }), defaultCol('to', 'relationship', { isNullable: false }),
+    defaultCol('weight', 'float', { defaultValue: '1.0' }),
+  ] } },
+  { id: 'graph-purchased', label: 'PURCHASED', icon: Network, category: 'Graph Edges', engine: 'graph', createTable: { name: 'PURCHASED', kind: 'edge', columns: [
+    defaultCol('from', 'relationship', { isNullable: false }), defaultCol('to', 'relationship', { isNullable: false }),
+    defaultCol('quantity', 'integer', { defaultValue: '1' }), defaultCol('date', 'date'),
+  ] } },
+  { id: 'graph-located-in', label: 'LOCATED_IN', icon: Network, category: 'Graph Edges', engine: 'graph', createTable: { name: 'LOCATED_IN', kind: 'edge', columns: [
+    defaultCol('from', 'relationship', { isNullable: false }), defaultCol('to', 'relationship', { isNullable: false }),
+    defaultCol('since', 'date'),
+  ] } },
+  { id: 'graph-tagged', label: 'TAGGED', icon: Network, category: 'Graph Edges', engine: 'graph', createTable: { name: 'TAGGED', kind: 'edge', columns: [
+    defaultCol('from', 'relationship', { isNullable: false }), defaultCol('to', 'relationship', { isNullable: false }),
+  ] } },
+
+  // ── Graph Fields ──
+  { id: 'graph-col-label', label: 'Node Label', icon: GitBranch, category: 'Graph Fields', engine: 'graph', createColumn: defaultCol('labels', 'node_label') },
+  { id: 'graph-col-rel', label: 'Relationship', icon: Network, category: 'Graph Fields', engine: 'graph', createColumn: defaultCol('ref', 'relationship') },
+  { id: 'graph-col-prop', label: 'Property', icon: Settings, category: 'Graph Fields', engine: 'graph', createColumn: defaultCol('prop', 'property') },
+  { id: 'graph-col-text', label: 'Text', icon: Type, category: 'Graph Fields', engine: 'graph', createColumn: defaultCol('name', 'text') },
+  { id: 'graph-col-int', label: 'Integer', icon: Hash, category: 'Graph Fields', engine: 'graph', createColumn: defaultCol('count', 'integer') },
+
   // ══════════ Time Series Templates ══════════
-  { id: 'ts-metrics', label: 'System Metrics', icon: Activity, category: 'Time Series', engine: 'timeseries', createTable: { name: 'system_metrics', kind: 'measurement', columns: [
+  { id: 'ts-metrics', label: 'System Metrics', icon: Activity, category: 'Time Series Measurements', engine: 'timeseries', createTable: { name: 'system_metrics', kind: 'measurement', columns: [
     defaultCol('time', 'time', { isPrimary: true, isNullable: false }), defaultCol('host', 'tag_ts', { isNullable: false }),
     defaultCol('region', 'tag_ts'), defaultCol('cpu_usage', 'field', { isNullable: false }),
     defaultCol('mem_usage', 'field'), defaultCol('disk_io', 'field'),
   ] } },
-  { id: 'ts-events', label: 'App Events', icon: BarChart3, category: 'Time Series', engine: 'timeseries', createTable: { name: 'app_events', kind: 'measurement', columns: [
+  { id: 'ts-events', label: 'App Events', icon: BarChart3, category: 'Time Series Measurements', engine: 'timeseries', createTable: { name: 'app_events', kind: 'measurement', columns: [
     defaultCol('time', 'time', { isPrimary: true, isNullable: false }), defaultCol('event_type', 'tag_ts', { isNullable: false }),
     defaultCol('user_id', 'tag_ts'), defaultCol('value', 'field'),
     defaultCol('metadata', 'field'),
   ] } },
-  { id: 'ts-iot', label: 'IoT Sensor Data', icon: Activity, category: 'Time Series', engine: 'timeseries', createTable: { name: 'sensor_data', kind: 'measurement', columns: [
+  { id: 'ts-iot', label: 'IoT Sensor Data', icon: Activity, category: 'Time Series Measurements', engine: 'timeseries', createTable: { name: 'sensor_data', kind: 'measurement', columns: [
     defaultCol('time', 'time', { isPrimary: true, isNullable: false }), defaultCol('device_id', 'tag_ts', { isNullable: false }),
     defaultCol('sensor_type', 'tag_ts'), defaultCol('reading', 'field', { isNullable: false }),
     defaultCol('unit', 'tag_ts'),
   ] } },
+  { id: 'ts-http', label: 'HTTP Requests', icon: Globe, category: 'Time Series Measurements', engine: 'timeseries', createTable: { name: 'http_requests', kind: 'measurement', columns: [
+    defaultCol('time', 'time', { isPrimary: true, isNullable: false }), defaultCol('method', 'tag_ts', { isNullable: false }),
+    defaultCol('path', 'tag_ts', { isNullable: false }), defaultCol('status_code', 'tag_ts'),
+    defaultCol('response_time_ms', 'field', { isNullable: false }), defaultCol('bytes', 'field'),
+  ] } },
+  { id: 'ts-financial', label: 'Financial Ticks', icon: BarChart3, category: 'Time Series Measurements', engine: 'timeseries', createTable: { name: 'price_ticks', kind: 'measurement', columns: [
+    defaultCol('time', 'time', { isPrimary: true, isNullable: false }), defaultCol('symbol', 'tag_ts', { isNullable: false }),
+    defaultCol('exchange', 'tag_ts'), defaultCol('price', 'field', { isNullable: false }),
+    defaultCol('volume', 'field'), defaultCol('bid', 'field'), defaultCol('ask', 'field'),
+  ] } },
+  { id: 'ts-logs', label: 'Log Entries', icon: FileText, category: 'Time Series Measurements', engine: 'timeseries', createTable: { name: 'logs', kind: 'measurement', columns: [
+    defaultCol('time', 'time', { isPrimary: true, isNullable: false }), defaultCol('level', 'tag_ts', { isNullable: false }),
+    defaultCol('service', 'tag_ts'), defaultCol('message', 'field', { isNullable: false }),
+    defaultCol('trace_id', 'tag_ts'),
+  ] } },
+
+  // ── Time Series Fields ──
+  { id: 'ts-col-time', label: 'Timestamp', icon: Clock, category: 'TS Fields', engine: 'timeseries', createColumn: defaultCol('time', 'time') },
+  { id: 'ts-col-field', label: 'Field (value)', icon: BarChart3, category: 'TS Fields', engine: 'timeseries', createColumn: defaultCol('value', 'field') },
+  { id: 'ts-col-tag', label: 'Tag (index)', icon: Tag, category: 'TS Fields', engine: 'timeseries', createColumn: defaultCol('label', 'tag_ts') },
+  { id: 'ts-col-measurement', label: 'Measurement', icon: Activity, category: 'TS Fields', engine: 'timeseries', createColumn: defaultCol('metric', 'measurement') },
 
   // ══════════ Key-Value Templates ══════════
-  { id: 'kv-cache', label: 'Cache Store', icon: Boxes, category: 'Key-Value', engine: 'keyvalue', createTable: { name: 'cache', kind: 'bucket', columns: [
+  { id: 'kv-cache', label: 'Cache Store', icon: Boxes, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'cache', kind: 'bucket', columns: [
     defaultCol('key', 'key', { isPrimary: true, isNullable: false }), defaultCol('value', 'value', { isNullable: false }),
     defaultCol('ttl', 'ttl', { defaultValue: '3600' }),
   ] } },
-  { id: 'kv-session', label: 'Session Store', icon: Lock, category: 'Key-Value', engine: 'keyvalue', createTable: { name: 'sessions', kind: 'bucket', columns: [
+  { id: 'kv-session', label: 'Session Store', icon: Lock, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'sessions', kind: 'bucket', columns: [
     defaultCol('session_id', 'key', { isPrimary: true, isNullable: false }), defaultCol('data', 'hash_kv'),
     defaultCol('user_id', 'key'), defaultCol('ttl', 'ttl', { defaultValue: '86400' }),
   ] } },
-  { id: 'kv-leaderboard', label: 'Leaderboard', icon: BarChart3, category: 'Key-Value', engine: 'keyvalue', createTable: { name: 'leaderboard', kind: 'bucket', columns: [
+  { id: 'kv-leaderboard', label: 'Leaderboard', icon: BarChart3, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'leaderboard', kind: 'bucket', columns: [
     defaultCol('board_name', 'key', { isPrimary: true, isNullable: false }), defaultCol('scores', 'sorted_set'),
   ] } },
-  { id: 'kv-queue', label: 'Message Queue', icon: List, category: 'Key-Value', engine: 'keyvalue', createTable: { name: 'message_queue', kind: 'bucket', columns: [
+  { id: 'kv-queue', label: 'Message Queue', icon: List, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'message_queue', kind: 'bucket', columns: [
     defaultCol('queue_name', 'key', { isPrimary: true, isNullable: false }), defaultCol('messages', 'list_kv'),
   ] } },
+  { id: 'kv-config', label: 'Config Store', icon: Settings, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'config', kind: 'bucket', columns: [
+    defaultCol('key', 'key', { isPrimary: true, isNullable: false }), defaultCol('value', 'json', { isNullable: false }),
+  ] } },
+  { id: 'kv-rate-limit', label: 'Rate Limiter', icon: Shield, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'rate_limits', kind: 'bucket', columns: [
+    defaultCol('client_key', 'key', { isPrimary: true, isNullable: false }), defaultCol('count', 'integer', { defaultValue: '0' }),
+    defaultCol('window_start', 'integer'), defaultCol('ttl', 'ttl', { defaultValue: '60' }),
+  ] } },
+  { id: 'kv-feature-flags', label: 'Feature Flags', icon: ToggleLeft, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'feature_flags', kind: 'bucket', columns: [
+    defaultCol('flag_name', 'key', { isPrimary: true, isNullable: false }), defaultCol('enabled', 'value', { defaultValue: 'true' }),
+    defaultCol('rollout_pct', 'integer', { defaultValue: '100' }),
+  ] } },
+  { id: 'kv-counter', label: 'Counters', icon: Hash, category: 'Key-Value Buckets', engine: 'keyvalue', createTable: { name: 'counters', kind: 'bucket', columns: [
+    defaultCol('counter_key', 'key', { isPrimary: true, isNullable: false }), defaultCol('value', 'integer', { defaultValue: '0' }),
+  ] } },
+
+  // ── KV Fields ──
+  { id: 'kv-col-key', label: 'Key', icon: Key, category: 'KV Fields', engine: 'keyvalue', createColumn: defaultCol('key', 'key') },
+  { id: 'kv-col-value', label: 'Value', icon: Type, category: 'KV Fields', engine: 'keyvalue', createColumn: defaultCol('value', 'value') },
+  { id: 'kv-col-hash', label: 'Hash', icon: Hash, category: 'KV Fields', engine: 'keyvalue', createColumn: defaultCol('data', 'hash_kv') },
+  { id: 'kv-col-sorted', label: 'Sorted Set', icon: List, category: 'KV Fields', engine: 'keyvalue', createColumn: defaultCol('scores', 'sorted_set') },
+  { id: 'kv-col-list', label: 'List', icon: List, category: 'KV Fields', engine: 'keyvalue', createColumn: defaultCol('items', 'list_kv') },
+  { id: 'kv-col-ttl', label: 'TTL', icon: Clock, category: 'KV Fields', engine: 'keyvalue', createColumn: defaultCol('ttl', 'ttl', { defaultValue: '3600' }) },
 
   // ── SQL Column types ──
   { id: 'col-uuid', label: 'UUID', icon: Key, category: 'SQL Columns', engine: 'sql', createColumn: defaultCol('id', 'uuid') },
@@ -905,15 +1046,34 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
           <div style={{ transform: `translate(${canvasPan.x}px, ${canvasPan.y}px) scale(${canvasZoom})`, transformOrigin: '0 0', position: 'absolute', inset: 0 }}>
             {schema.tables.map(table => {
               const isGraphEdge = table.kind === 'edge';
+              const isGraphNode = table.kind === 'node';
+              const isCollection = table.kind === 'collection';
+              const isIndex = table.kind === 'index';
+              const isMeasurement = table.kind === 'measurement';
+              const isBucket = table.kind === 'bucket';
+
+              // Engine-specific border radius
+              const radius = isGraphEdge ? 24 : isGraphNode ? 16 : isCollection ? 8 : isIndex ? 6 : isMeasurement ? 4 : isBucket ? 14 : 12;
+              // Engine-specific border style
+              const borderStyle = isGraphEdge ? 'dashed' : isMeasurement ? 'dotted' : 'solid';
+              // Engine-specific background
+              const bgColor = isCollection ? '#0d1117' : isIndex ? '#0a0f1a' : isMeasurement ? '#0f0d12' : isBucket ? '#100d0a' : '#111827';
+              // Engine-specific header icon
+              const HeaderIcon = isGraphEdge ? Network : isGraphNode ? GitBranch : isCollection ? Braces : isIndex ? Hexagon : isMeasurement ? BarChart3 : isBucket ? Boxes : Table2;
+              // Engine-specific kind badge color
+              const kindBadgeColor = isGraphEdge ? '#f43f5e' : isGraphNode ? '#22d3ee' : isCollection ? '#22c55e' : isIndex ? '#a78bfa' : isMeasurement ? '#f97316' : isBucket ? '#eab308' : table.color;
+              // Engine-specific column accent
+              const typeColor = isCollection ? '#22c55e' : isIndex ? '#a78bfa' : isMeasurement ? '#f97316' : isBucket ? '#eab308' : '#a78bfa';
+
               return (
                 <div
                   key={table.id}
                   className={`absolute select-none transition-shadow ${connectingFrom ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'} ${selectedTableId === table.id ? 'ring-2 ring-cyan-500/50' : ''} ${connectingFrom && connectingFrom.tableId !== table.id ? 'ring-2 ring-cyan-400/30 ring-offset-1' : ''}`}
                   style={{
                     left: table.x, top: table.y, width: TABLE_WIDTH,
-                    borderRadius: isGraphEdge ? 20 : 12,
-                    overflow: 'visible', background: '#111827',
-                    border: `1px solid ${table.color}30`,
+                    borderRadius: radius,
+                    overflow: 'visible', background: bgColor,
+                    border: `1px ${borderStyle} ${table.color}30`,
                     boxShadow: selectedTableId === table.id ? `0 0 20px ${table.color}20` : 'none',
                   }}
                   onMouseDown={e => handleTableMouseDown(e, table.id)}
@@ -928,30 +1088,57 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
                   </div>
 
                   {/* Header */}
-                  <div className="flex items-center gap-2 px-3 py-2.5" style={{ background: `${table.color}15`, borderBottom: `1px solid ${table.color}20`, borderRadius: isGraphEdge ? '20px 20px 0 0' : '12px 12px 0 0' }}>
-                    {isGraphEdge ? <Network className="w-3.5 h-3.5" style={{ color: table.color }} /> : <Table2 className="w-3.5 h-3.5" style={{ color: table.color }} />}
+                  <div className="flex items-center gap-2 px-3 py-2.5" style={{ background: `${table.color}15`, borderBottom: `1px solid ${table.color}20`, borderRadius: `${radius}px ${radius}px 0 0` }}>
+                    <HeaderIcon className="w-3.5 h-3.5" style={{ color: table.color }} />
                     <span className="text-[11px] font-black uppercase tracking-wider" style={{ color: table.color }}>{table.name}</span>
-                    <span className="text-[8px] text-white/20 ml-auto mr-1">{table.kind || eLabel}</span>
+                    <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-full ml-auto mr-1" style={{ background: `${kindBadgeColor}20`, color: kindBadgeColor }}>{table.kind || eLabel}</span>
                     <span className="text-[9px] text-white/30">{table.columns.length}</span>
                     <button onClick={e => { e.stopPropagation(); deleteTable(table.id); }} className="p-1 rounded hover:bg-red-500/20 text-white/20 hover:text-red-400 transition-colors">
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
-                  {/* Columns */}
+
+                  {/* Engine-specific column display */}
                   {table.columns.map(col => {
                     const ColIcon = columnTypeIcons[col.type] || Type;
+                    // NoSQL: show nested-style for object/array/map
+                    const isNested = ['object', 'map', 'array', 'json', 'jsonb'].includes(col.type);
+                    // Vector: highlight embedding columns
+                    const isVector = ['vector', 'embedding', 'sparse_vector'].includes(col.type);
+                    // TimeSeries: differentiate tags vs fields
+                    const isTag = col.type === 'tag_ts';
+                    const isField = col.type === 'field';
+                    const isTime = col.type === 'time';
+                    // KV: highlight key vs value
+                    const isKey = col.type === 'key';
+                    const isVal = col.type === 'value' || col.type === 'hash_kv' || col.type === 'sorted_set' || col.type === 'list_kv';
+
+                    let nameColor = col.isPrimary ? 'text-amber-300' : 'text-white/70';
+                    let nameBold = col.isPrimary ? 'font-bold' : '';
+                    let bgHighlight = '';
+
+                    if (isVector) { nameColor = 'text-purple-300'; bgHighlight = 'bg-purple-500/5'; }
+                    if (isTag) { nameColor = 'text-orange-300'; bgHighlight = 'bg-orange-500/5'; }
+                    if (isField) { nameColor = 'text-blue-300'; }
+                    if (isTime) { nameColor = 'text-orange-400'; nameBold = 'font-bold'; bgHighlight = 'bg-orange-500/5'; }
+                    if (isKey) { nameColor = 'text-yellow-300'; nameBold = 'font-bold'; bgHighlight = 'bg-yellow-500/5'; }
+                    if (isVal) { bgHighlight = 'bg-blue-500/5'; }
+                    if (isNested && isCollection) { bgHighlight = 'bg-green-500/5'; }
+
                     return (
-                      <div key={col.id} className={`flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 transition-colors cursor-pointer ${selectedColumnId === col.id ? 'bg-white/5' : ''}`}
+                      <div key={col.id} className={`flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 transition-colors cursor-pointer ${selectedColumnId === col.id ? 'bg-white/5' : bgHighlight}`}
                         onClick={e => { e.stopPropagation(); setSelectedTableId(table.id); setSelectedColumnId(col.id); setShowRightPanel(true); }}>
-                        {col.isPrimary ? <Key className="w-3 h-3 text-amber-400 shrink-0" /> : col.reference ? <Link2 className="w-3 h-3 text-purple-400 shrink-0" /> : <ColIcon className="w-3 h-3 text-white/30 shrink-0" />}
-                        <span className={`text-[11px] flex-1 truncate ${col.isPrimary ? 'font-bold text-amber-300' : 'text-white/70'}`}>{col.name}</span>
-                        <span className="text-[9px] text-purple-400/60">{col.type}{col.dimension ? `(${col.dimension})` : ''}</span>
+                        {col.isPrimary ? <Key className="w-3 h-3 text-amber-400 shrink-0" /> : col.reference ? <Link2 className="w-3 h-3 text-purple-400 shrink-0" /> : <ColIcon className="w-3 h-3 shrink-0" style={{ color: isVector ? '#a78bfa' : isTag ? '#f97316' : isField ? '#60a5fa' : isKey ? '#eab308' : 'rgba(255,255,255,0.3)' }} />}
+                        <span className={`text-[11px] flex-1 truncate ${nameBold} ${nameColor}`}>{isNested && isCollection ? `{ ${col.name} }` : col.name}</span>
+                        <span className="text-[9px]" style={{ color: `${typeColor}99` }}>{col.type}{col.dimension ? `(${col.dimension})` : ''}</span>
                         {!col.isNullable && <span className="text-[8px] text-red-400/60 shrink-0">NN</span>}
+                        {isTag && <span className="text-[7px] text-orange-400/50 shrink-0">TAG</span>}
+                        {isField && <span className="text-[7px] text-blue-400/50 shrink-0">FIELD</span>}
                       </div>
                     );
                   })}
-                  <button onClick={e => { e.stopPropagation(); setSelectedTableId(table.id); addColumn(); }} className="w-full flex items-center gap-2 px-3 py-2 text-white/20 hover:text-white/50 hover:bg-white/5 transition-colors" style={{ borderRadius: isGraphEdge ? '0 0 20px 20px' : '0 0 12px 12px' }}>
-                    <Plus className="w-3 h-3" /><span className="text-[10px]">Add column</span>
+                  <button onClick={e => { e.stopPropagation(); setSelectedTableId(table.id); addColumn(); }} className="w-full flex items-center gap-2 px-3 py-2 text-white/20 hover:text-white/50 hover:bg-white/5 transition-colors" style={{ borderRadius: `0 0 ${radius}px ${radius}px` }}>
+                    <Plus className="w-3 h-3" /><span className="text-[10px]">Add {isBucket ? 'field' : isCollection ? 'field' : isMeasurement ? 'field' : 'column'}</span>
                   </button>
                 </div>
               );
