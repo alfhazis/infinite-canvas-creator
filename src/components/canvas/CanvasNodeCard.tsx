@@ -626,7 +626,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
                 )}
 
                 {/* Code Editor - for all node types */}
-                {node.type !== 'idea' && (node.content || node.generatedCode || node.status === 'ready') && (
+                {node.type !== 'idea' && (
                   <button onMouseDown={(e) => e.stopPropagation()} onClick={handleCodeEdit} className="p-3 rounded-xl border border-amber-500/30 text-amber-400 hover:text-amber-300 hover:border-amber-500/50 hover:bg-amber-500/10 transition-all" title="Code Editor">
                     <Code2 className="w-4 h-4" />
                   </button>
