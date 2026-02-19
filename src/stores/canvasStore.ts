@@ -40,6 +40,8 @@ export interface CanvasNode {
   language?: string;
   /** environment variables for env nodes */
   envVars?: Record<string, string>;
+  /** specific AI model for this node */
+  aiModel?: string;
 }
 
 export interface UIVariation {

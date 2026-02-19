@@ -138,14 +138,15 @@ export const CanvasNodeCard = ({ node }: Props) => {
       setShowPlatformPicker(false);
       updateNode(node.id, { status: 'generating', platform });
 
-      const { aiModel, openRouterKey } = useCanvasStore.getState();
-      const useAI = aiModel !== 'auto' && openRouterKey;
+      const { aiModel: globalModel, openRouterKey } = useCanvasStore.getState();
+      const nodeModel = node.aiModel || globalModel;
+      const useAI = nodeModel !== 'auto' && openRouterKey;
 
       try {
         let variations;
         if (useAI) {
           const promises = Array.from({ length: variationCount }).map(() => 
-            generateFullPageWithAI(node.title, node.description, platform, openRouterKey!, aiModel)
+            generateFullPageWithAI(node.title, node.description, platform, openRouterKey!, nodeModel)
           );
           variations = await Promise.all(promises);
         } else {
@@ -212,7 +213,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
         updateNode(node.id, { status: 'idle' });
       }
     },
-    [node.id, node.title, node.description, node.x, node.y, node.width, updateNode, addNode, connectNodes, setPan, zoom]
+    [node.id, node.title, node.description, node.x, node.y, node.width, node.aiModel, updateNode, addNode, connectNodes, setPan, zoom]
   );
 
   /* ── Regenerate: swap content with a different full-page variation ── */
@@ -222,13 +223,14 @@ export const CanvasNodeCard = ({ node }: Props) => {
       if (!node.platform) return;
       updateNode(node.id, { status: 'generating' });
 
-      const { aiModel, openRouterKey } = useCanvasStore.getState();
-      const useAI = aiModel !== 'auto' && openRouterKey;
+      const { aiModel: globalModel, openRouterKey } = useCanvasStore.getState();
+      const nodeModel = node.aiModel || globalModel;
+      const useAI = nodeModel !== 'auto' && openRouterKey;
 
       try {
         let variation;
         if (useAI) {
-          variation = await generateFullPageWithAI(node.title, node.description, node.platform!, openRouterKey!, aiModel);
+          variation = await generateFullPageWithAI(node.title, node.description, node.platform!, openRouterKey!, nodeModel);
         } else {
           // Find parent idea node to get original title
           const parentNode = node.parentId
@@ -253,7 +255,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
         updateNode(node.id, { status: 'ready' });
       }
     },
-    [node.id, node.title, node.description, node.parentId, node.platform, node.generatedCode, updateNode]
+    [node.id, node.title, node.description, node.parentId, node.platform, node.generatedCode, node.aiModel, updateNode]
   );
 
   /* ── Generate Sub-UI sections from a page ── */
@@ -263,13 +265,14 @@ export const CanvasNodeCard = ({ node }: Props) => {
       setShowNextMenu(false);
       updateNode(node.id, { status: 'generating' });
 
-      const { aiModel, openRouterKey } = useCanvasStore.getState();
-      const useAI = aiModel !== 'auto' && openRouterKey;
+      const { aiModel: globalModel, openRouterKey } = useCanvasStore.getState();
+      const nodeModel = node.aiModel || globalModel;
+      const useAI = nodeModel !== 'auto' && openRouterKey;
 
       try {
         let subSections;
         if (useAI) {
-          subSections = await generateSubSectionsWithAI(node.title, node.platform || 'web', subUiPrompt, openRouterKey!, aiModel, variationCount);
+          subSections = await generateSubSectionsWithAI(node.title, node.platform || 'web', subUiPrompt, openRouterKey!, nodeModel, variationCount);
         } else {
           await new Promise(r => setTimeout(r, 1200));
           subSections = generateSubSections(node.title, node.platform || 'web', subUiPrompt).slice(0, variationCount);
@@ -332,7 +335,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
         updateNode(node.id, { status: 'ready' });
       }
     },
-    [node.id, node.title, node.x, node.y, node.width, node.platform, updateNode, addNode, connectNodes, setPan, zoom, subUiPrompt]
+    [node.id, node.title, node.x, node.y, node.width, node.platform, node.aiModel, updateNode, addNode, connectNodes, setPan, zoom, subUiPrompt]
   );
 
   const handleRun = useCallback(
@@ -610,7 +613,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
                       <Cpu className="w-3 h-3 text-primary" />
                       <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">AI Model</p>
                     </div>
-                    <ModelSelector />
+                    <ModelSelector nodeId={node.id} />
                   </div>
                 )}
 

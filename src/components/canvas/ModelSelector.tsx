@@ -20,11 +20,26 @@ import { useCanvasStore } from "@/stores/canvasStore";
 interface ModelSelectorProps {
   className?: string;
   showAuto?: boolean;
+  nodeId?: string;
 }
 
-export function ModelSelector({ className, showAuto = true }: ModelSelectorProps) {
+export function ModelSelector({ className, showAuto = true, nodeId }: ModelSelectorProps) {
   const [open, setOpen] = React.useState(false);
-  const { aiModel, setAiModel, availableModels } = useCanvasStore();
+  const { aiModel: globalAiModel, setAiModel: setGlobalAiModel, availableModels, nodes, updateNode } = useCanvasStore();
+
+  const currentNode = React.useMemo(() => 
+    nodeId ? nodes.find(n => n.id === nodeId) : null
+  , [nodes, nodeId]);
+
+  const aiModel = nodeId ? (currentNode?.aiModel || "auto") : globalAiModel;
+
+  const setAiModel = (model: string) => {
+    if (nodeId) {
+      updateNode(nodeId, { aiModel: model });
+    } else {
+      setGlobalAiModel(model);
+    }
+  };
 
   const selectedModelName = React.useMemo(() => {
     if (aiModel === "auto") return "Auto (Balanced)";
