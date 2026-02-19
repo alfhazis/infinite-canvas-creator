@@ -40,6 +40,8 @@ const getFileIcon = (name: string) => {
   if (name.endsWith('.py')) return <FileCode className="w-3.5 h-3.5 text-yellow-300" />;
   if (name.endsWith('.go')) return <FileCode className="w-3.5 h-3.5 text-cyan-300" />;
   if (name.endsWith('.rs')) return <FileCode className="w-3.5 h-3.5 text-orange-300" />;
+  if (name.endsWith('.php')) return <FileCode className="w-3.5 h-3.5 text-purple-400" />;
+  if (name.endsWith('.java')) return <FileCode className="w-3.5 h-3.5 text-orange-400" />;
   if (name.endsWith('.yaml') || name.endsWith('.yml')) return <FileCog className="w-3.5 h-3.5 text-purple-400" />;
   if (name.endsWith('.env')) return <FileCog className="w-3.5 h-3.5 text-amber-400" />;
   if (name.endsWith('.graphql') || name.endsWith('.gql')) return <Server className="w-3.5 h-3.5 text-pink-300" />;
@@ -47,8 +49,10 @@ const getFileIcon = (name: string) => {
 };
 
 const getLangFromName = (name: string): string => {
-  if (name.endsWith('.ts') || name.endsWith('.tsx')) return 'typescript';
-  if (name.endsWith('.js') || name.endsWith('.jsx')) return 'javascript';
+  if (name.endsWith('.tsx')) return 'typescriptreact';
+  if (name.endsWith('.ts')) return 'typescript';
+  if (name.endsWith('.jsx')) return 'javascriptreact';
+  if (name.endsWith('.js')) return 'javascript';
   if (name.endsWith('.json')) return 'json';
   if (name.endsWith('.css') || name.endsWith('.scss')) return 'css';
   if (name.endsWith('.html')) return 'html';
@@ -57,6 +61,8 @@ const getLangFromName = (name: string): string => {
   if (name.endsWith('.py')) return 'python';
   if (name.endsWith('.go')) return 'go';
   if (name.endsWith('.rs')) return 'rust';
+  if (name.endsWith('.php')) return 'php';
+  if (name.endsWith('.java')) return 'java';
   if (name.endsWith('.sh') || name.endsWith('.bash')) return 'bash';
   if (name.endsWith('.yaml') || name.endsWith('.yml')) return 'yaml';
   if (name.endsWith('.graphql') || name.endsWith('.gql')) return 'graphql';
@@ -72,14 +78,14 @@ const getDefaultTree = (platform: string, title: string): FileNode[] => {
       return [
         { id: uid(), name: 'src', type: 'folder', children: [
           { id: uid(), name: 'components', type: 'folder', children: [
-            { id: uid(), name: `${t}.tsx`, type: 'file', content: `import React from 'react';\n\nexport const ${title.replace(/\\s+/g, '')} = () => {\n  return (\n    <div className="p-6">\n      <h1 className="text-2xl font-bold">${title}</h1>\n      <p>Your component here</p>\n    </div>\n  );\n};\n`, language: 'typescript' },
-            { id: uid(), name: 'Header.tsx', type: 'file', content: `import React from 'react';\n\nexport const Header = () => (\n  <header className="flex items-center justify-between p-4 border-b">\n    <h1 className="font-bold text-lg">${title}</h1>\n    <nav className="flex gap-4">\n      <a href="#">Home</a>\n      <a href="#">About</a>\n    </nav>\n  </header>\n);\n`, language: 'typescript' },
+            { id: uid(), name: `${t}.tsx`, type: 'file', content: `import React from 'react';\n\nexport const ${title.replace(/\\s+/g, '')} = () => {\n  return (\n    <div className="p-6">\n      <h1 className="text-2xl font-bold">${title}</h1>\n      <p>Your component here</p>\n    </div>\n  );\n};\n`, language: 'typescriptreact' },
+            { id: uid(), name: 'Header.tsx', type: 'file', content: `import React from 'react';\n\nexport const Header = () => (\n  <header className="flex items-center justify-between p-4 border-b">\n    <h1 className="font-bold text-lg">${title}</h1>\n    <nav className="flex gap-4">\n      <a href="#">Home</a>\n      <a href="#">About</a>\n    </nav>\n  </header>\n);\n`, language: 'typescriptreact' },
           ]},
           { id: uid(), name: 'styles', type: 'folder', children: [
             { id: uid(), name: 'globals.css', type: 'file', content: `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n:root {\n  --primary: #6366f1;\n}\n`, language: 'css' },
           ]},
-          { id: uid(), name: 'App.tsx', type: 'file', content: `import React from 'react';\nimport { Header } from './components/Header';\n\nexport default function App() {\n  return (\n    <div>\n      <Header />\n      <main className="p-6">\n        <h2>Welcome</h2>\n      </main>\n    </div>\n  );\n}\n`, language: 'typescript' },
-          { id: uid(), name: 'main.tsx', type: 'file', content: `import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './styles/globals.css';\n\nReactDOM.createRoot(document.getElementById('root')!).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);\n`, language: 'typescript' },
+          { id: uid(), name: 'App.tsx', type: 'file', content: `import React from 'react';\nimport { Header } from './components/Header';\n\nexport default function App() {\n  return (\n    <div>\n      <Header />\n      <main className="p-6">\n        <h2>Welcome</h2>\n      </main>\n    </div>\n  );\n}\n`, language: 'typescriptreact' },
+          { id: uid(), name: 'main.tsx', type: 'file', content: `import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './styles/globals.css';\n\nReactDOM.createRoot(document.getElementById('root')!).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);\n`, language: 'typescriptreact' },
         ]},
         { id: uid(), name: 'public', type: 'folder', children: [
           { id: uid(), name: 'index.html', type: 'file', content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8" />\n  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n  <title>${title}</title>\n</head>\n<body>\n  <div id="root"></div>\n  <script type="module" src="/src/main.tsx"></script>\n</body>\n</html>\n`, language: 'html' },
@@ -91,12 +97,12 @@ const getDefaultTree = (platform: string, title: string): FileNode[] => {
       return [
         { id: uid(), name: 'src', type: 'folder', children: [
           { id: uid(), name: 'screens', type: 'folder', children: [
-            { id: uid(), name: 'HomeScreen.tsx', type: 'file', content: `import React from 'react';\nimport { View, Text, StyleSheet } from 'react-native';\n\nexport const HomeScreen = () => (\n  <View style={styles.container}>\n    <Text style={styles.title}>${title}</Text>\n  </View>\n);\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },\n  title: { fontSize: 24, fontWeight: 'bold' },\n});\n`, language: 'typescript' },
+            { id: uid(), name: 'HomeScreen.tsx', type: 'file', content: `import React from 'react';\nimport { View, Text, StyleSheet } from 'react-native';\n\nexport const HomeScreen = () => (\n  <View style={styles.container}>\n    <Text style={styles.title}>${title}</Text>\n  </View>\n);\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },\n  title: { fontSize: 24, fontWeight: 'bold' },\n});\n`, language: 'typescriptreact' },
           ]},
           { id: uid(), name: 'navigation', type: 'folder', children: [
-            { id: uid(), name: 'AppNavigator.tsx', type: 'file', content: `import React from 'react';\nimport { NavigationContainer } from '@react-navigation/native';\nimport { createStackNavigator } from '@react-navigation/stack';\nimport { HomeScreen } from '../screens/HomeScreen';\n\nconst Stack = createStackNavigator();\n\nexport const AppNavigator = () => (\n  <NavigationContainer>\n    <Stack.Navigator>\n      <Stack.Screen name="Home" component={HomeScreen} />\n    </Stack.Navigator>\n  </NavigationContainer>\n);\n`, language: 'typescript' },
+            { id: uid(), name: 'AppNavigator.tsx', type: 'file', content: `import React from 'react';\nimport { NavigationContainer } from '@react-navigation/native';\nimport { createStackNavigator } from '@react-navigation/stack';\nimport { HomeScreen } from '../screens/HomeScreen';\n\nconst Stack = createStackNavigator();\n\nexport const AppNavigator = () => (\n  <NavigationContainer>\n    <Stack.Navigator>\n      <Stack.Screen name="Home" component={HomeScreen} />\n    </Stack.Navigator>\n  </NavigationContainer>\n);\n`, language: 'typescriptreact' },
           ]},
-          { id: uid(), name: 'App.tsx', type: 'file', content: `import React from 'react';\nimport { AppNavigator } from './navigation/AppNavigator';\n\nexport default function App() {\n  return <AppNavigator />;\n}\n`, language: 'typescript' },
+          { id: uid(), name: 'App.tsx', type: 'file', content: `import React from 'react';\nimport { AppNavigator } from './navigation/AppNavigator';\n\nexport default function App() {\n  return <AppNavigator />;\n}\n`, language: 'typescriptreact' },
         ]},
         { id: uid(), name: 'app.json', type: 'file', content: `{\n  "expo": {\n    "name": "${title}",\n    "slug": "${t}",\n    "version": "1.0.0"\n  }\n}\n`, language: 'json' },
         { id: uid(), name: 'package.json', type: 'file', content: `{\n  "name": "${t}",\n  "version": "1.0.0",\n  "dependencies": {\n    "expo": "~49.0.0",\n    "react-native": "0.72.0"\n  }\n}\n`, language: 'json' },
@@ -144,8 +150,8 @@ const getDefaultTree = (platform: string, title: string): FileNode[] => {
             { id: uid(), name: 'preload.ts', type: 'file', content: `import { contextBridge, ipcRenderer } from 'electron';\n\ncontextBridge.exposeInMainWorld('api', {\n  send: (channel: string, data: any) => ipcRenderer.send(channel, data),\n  receive: (channel: string, fn: (...args: any[]) => void) =>\n    ipcRenderer.on(channel, (_, ...args) => fn(...args)),\n});\n`, language: 'typescript' },
           ]},
           { id: uid(), name: 'renderer', type: 'folder', children: [
-            { id: uid(), name: 'App.tsx', type: 'file', content: `import React from 'react';\n\nexport const App = () => (\n  <div className="p-6">\n    <h1 className="text-2xl font-bold">${title}</h1>\n    <p className="text-gray-600">Desktop Application</p>\n  </div>\n);\n`, language: 'typescript' },
-            { id: uid(), name: 'index.tsx', type: 'file', content: `import React from 'react';\nimport { createRoot } from 'react-dom/client';\nimport { App } from './App';\n\nconst root = createRoot(document.getElementById('root')!);\nroot.render(<App />);\n`, language: 'typescript' },
+            { id: uid(), name: 'App.tsx', type: 'file', content: `import React from 'react';\n\nexport const App = () => (\n  <div className="p-6">\n    <h1 className="text-2xl font-bold">${title}</h1>\n    <p className="text-gray-600">Desktop Application</p>\n  </div>\n);\n`, language: 'typescriptreact' },
+            { id: uid(), name: 'index.tsx', type: 'file', content: `import React from 'react';\nimport { createRoot } from 'react-dom/client';\nimport { App } from './App';\n\nconst root = createRoot(document.getElementById('root')!);\nroot.render(<App />);\n`, language: 'typescriptreact' },
           ]},
         ]},
         { id: uid(), name: 'package.json', type: 'file', content: `{\n  "name": "${t}",\n  "version": "1.0.0",\n  "main": "dist/main/main.js",\n  "scripts": {\n    "dev": "electron .",\n    "build": "tsc && electron-builder"\n  },\n  "dependencies": {\n    "electron": "^28.0.0"\n  }\n}\n`, language: 'json' },
@@ -184,34 +190,84 @@ const highlightCode = (code: string, lang: string): string => {
     .replace(/>/g, '&gt;');
 
   // Comments
-  html = html.replace(/(\/\/.*$)/gm, '<span class="ce-comment">$1</span>');
-  html = html.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="ce-comment">$1</span>');
-  html = html.replace(/(--.*$)/gm, '<span class="ce-comment">$1</span>');
-  html = html.replace(/(#.*$)/gm, '<span class="ce-comment">$1</span>');
+  if (lang !== 'json') {
+    html = html.replace(/(\/\/.*$)/gm, '<span class="ce-comment">$1</span>');
+    html = html.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="ce-comment">$1</span>');
+    html = html.replace(/(--.*$)/gm, '<span class="ce-comment">$1</span>');
+    html = html.replace(/(#.*$)/gm, '<span class="ce-comment">$1</span>');
+  }
 
   // Strings
   html = html.replace(/(&#39;[^&#]*?&#39;|`[^`]*?`)/g, '<span class="ce-string">$1</span>');
   html = html.replace(/(&quot;[^&]*?&quot;)/g, '<span class="ce-string">$1</span>');
 
-  // Keywords
-  const kwList = ['import', 'export', 'from', 'const', 'let', 'var', 'function', 'return', 'if', 'else',
-    'for', 'while', 'class', 'interface', 'type', 'extends', 'implements', 'new', 'async', 'await',
-    'try', 'catch', 'throw', 'default', 'switch', 'case', 'break', 'continue',
-    'CREATE', 'TABLE', 'INSERT', 'INTO', 'VALUES', 'SELECT', 'FROM', 'WHERE', 'ALTER', 'DROP',
-    'INDEX', 'ON', 'PRIMARY', 'KEY', 'REFERENCES', 'NOT', 'NULL', 'DEFAULT', 'UNIQUE',
-    'IF', 'EXISTS', 'RETURNS', 'TRIGGER', 'AS', 'BEGIN', 'END', 'LANGUAGE', 'ENABLE', 'ROW', 'LEVEL', 'SECURITY',
-    'OR', 'REPLACE', 'FUNCTION', 'BEFORE', 'UPDATE', 'FOR', 'EACH', 'EXECUTE',
-  ];
-  const kwRegex = new RegExp(`\\b(${kwList.join('|')})\\b`, 'g');
-  html = html.replace(kwRegex, '<span class="ce-keyword">$1</span>');
+  // JSON Keys
+  if (lang === 'json') {
+    html = html.replace(/(&quot;[^&]*?&quot;)(?=\s*:)/g, '<span class="ce-keyword">$1</span>');
+  }
 
-  // Types & built-ins
-  const types = ['string', 'number', 'boolean', 'void', 'any', 'null', 'undefined', 'true', 'false',
-    'React', 'useState', 'useEffect', 'useCallback', 'useRef', 'Promise',
-    'VARCHAR', 'INTEGER', 'SERIAL', 'TEXT', 'TIMESTAMP', 'BOOLEAN',
-  ];
-  const tyRegex = new RegExp(`\\b(${types.join('|')})\\b`, 'g');
-  html = html.replace(tyRegex, '<span class="ce-type">$1</span>');
+  // Language specific keywords
+  let keywords: string[] = [];
+  let types: string[] = [];
+
+  const commonKeywords = ['if', 'else', 'for', 'while', 'return', 'break', 'continue', 'switch', 'case', 'default', 'try', 'catch', 'throw', 'class', 'function', 'new', 'import', 'export', 'from'];
+  const commonTypes = ['true', 'false', 'null', 'undefined'];
+
+  switch (lang) {
+    case 'javascript':
+    case 'javascriptreact':
+    case 'typescript':
+    case 'typescriptreact':
+      keywords = [...commonKeywords, 'const', 'let', 'var', 'async', 'await', 'type', 'interface', 'extends', 'implements', 'readonly', 'as', 'in', 'of', 'yield', 'static', 'get', 'set'];
+      types = [...commonTypes, 'string', 'number', 'boolean', 'void', 'any', 'unknown', 'never', 'Object', 'Array', 'Promise', 'React', 'useState', 'useEffect', 'useCallback', 'useRef', 'useMemo', 'useContext'];
+      break;
+    case 'css':
+    case 'scss':
+      keywords = ['@import', '@media', '@keyframes', '@font-face', '@extend', '@mixin', '@include', '@at-root', 'important'];
+      types = ['px', 'rem', 'em', '%', 'vh', 'vw', 'rgb', 'rgba', 'hsl', 'hsla', 'var', 'calc'];
+      break;
+    case 'html':
+      keywords = ['doctype', 'html', 'head', 'body', 'title', 'meta', 'link', 'script', 'style', 'div', 'span', 'p', 'a', 'img', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'form', 'input', 'button', 'label', 'select', 'textarea', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'nav', 'header', 'footer', 'main', 'section', 'article', 'aside', 'details', 'summary', 'canvas', 'svg', 'path', 'g', 'rect', 'circle', 'line', 'polyline', 'polygon'];
+      break;
+    case 'go':
+      keywords = ['package', 'import', 'func', 'var', 'const', 'type', 'struct', 'interface', 'map', 'chan', 'range', 'go', 'select', 'defer', 'fallthrough'];
+      types = ['string', 'int', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint8', 'uint16', 'uint32', 'uint64', 'uintptr', 'byte', 'rune', 'float32', 'float64', 'complex64', 'complex128', 'bool', 'error', 'nil', 'true', 'false'];
+      break;
+    case 'python':
+      keywords = ['def', 'class', 'import', 'from', 'as', 'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally', 'with', 'lambda', 'yield', 'return', 'break', 'continue', 'pass', 'raise', 'assert', 'global', 'nonlocal', 'del', 'in', 'is', 'and', 'or', 'not'];
+      types = ['int', 'float', 'complex', 'str', 'list', 'tuple', 'dict', 'set', 'bool', 'None', 'True', 'False', 'self'];
+      break;
+    case 'rust':
+      keywords = ['fn', 'let', 'mut', 'const', 'static', 'type', 'struct', 'enum', 'trait', 'impl', 'mod', 'use', 'pub', 'crate', 'self', 'Self', 'where', 'for', 'while', 'loop', 'if', 'else', 'match', 'return', 'break', 'continue', 'async', 'await', 'unsafe', 'extern', 'dyn', 'move', 'ref'];
+      types = ['i8', 'i16', 'i32', 'i64', 'i128', 'isize', 'u8', 'u16', 'u32', 'u64', 'u128', 'usize', 'f32', 'f64', 'bool', 'char', 'str', 'String', 'Option', 'Result', 'Box', 'Vec', 'true', 'false'];
+      break;
+    case 'php':
+      keywords = ['abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class', 'clone', 'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally', 'fn', 'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'interface', 'isset', 'list', 'match', 'namespace', 'new', 'or', 'print', 'private', 'protected', 'public', 'readonly', 'require', 'require_once', 'return', 'static', 'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var', 'while', 'xor', 'yield'];
+      types = ['int', 'float', 'string', 'bool', 'array', 'object', 'iterable', 'mixed', 'never', 'void', 'null', 'true', 'false'];
+      break;
+    case 'java':
+      keywords = ['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 'finally', 'float', 'for', 'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'native', 'new', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'try', 'void', 'volatile', 'while'];
+      types = ['String', 'Integer', 'Boolean', 'Double', 'Float', 'Long', 'Short', 'Byte', 'Character', 'Object', 'List', 'Map', 'Set', 'ArrayList', 'HashMap', 'HashSet', 'true', 'false', 'null'];
+      break;
+    case 'sql':
+      keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'NOT', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'ON', 'PRIMARY', 'KEY', 'REFERENCES', 'FOREIGN', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'GROUP', 'BY', 'ORDER', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'EXISTS', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'DEFAULT', 'UNIQUE', 'CHECK', 'CONSTRAINT', 'TRIGGER', 'PROCEDURE', 'FUNCTION', 'VIEW', 'DATABASE', 'SCHEMA', 'USE', 'AS', 'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'GROUP_CONCAT', 'CAST', 'COALESCE', 'IFNULL', 'NULLIF', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'];
+      types = ['VARCHAR', 'CHAR', 'TEXT', 'INT', 'INTEGER', 'SMALLINT', 'BIGINT', 'DECIMAL', 'NUMERIC', 'FLOAT', 'REAL', 'DOUBLE', 'BOOLEAN', 'DATE', 'TIME', 'TIMESTAMP', 'DATETIME', 'INTERVAL', 'JSON', 'JSONB', 'UUID', 'SERIAL', 'BIGSERIAL'];
+      break;
+    default:
+      keywords = commonKeywords;
+      types = commonTypes;
+      break;
+  }
+
+  if (keywords.length > 0) {
+    const kwRegex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+    html = html.replace(kwRegex, '<span class="ce-keyword">$1</span>');
+  }
+
+  if (types.length > 0) {
+    const tyRegex = new RegExp(`\\b(${types.join('|')})\\b`, 'g');
+    html = html.replace(tyRegex, '<span class="ce-type">$1</span>');
+  }
 
   return html;
 };
@@ -382,7 +438,7 @@ export const CodeEditor = ({ node, onClose }: Props) => {
   /* ── Rename ── */
   const handleRename = useCallback((id: string, name: string) => {
     if (!name.trim()) return;
-    const updated = updateFileInTree(tree, id, { name: name.trim() });
+    const updated = updateFileInTree(tree, id, { name: name.trim(), language: getLangFromName(name.trim()) });
     pushHistory(updated);
     setTree(updated);
     setOpenTabs(prev => prev.map(t => t.id === id ? { ...t, name: name.trim() } : t));
@@ -390,7 +446,8 @@ export const CodeEditor = ({ node, onClose }: Props) => {
 
   /* ── Add file/folder ── */
   const handleAddFile = useCallback((parentId: string) => {
-    const newFile: FileNode = { id: uid(), name: 'untitled.ts', type: 'file', content: '// New file\n', language: 'typescript' };
+    const name = 'untitled.ts';
+    const newFile: FileNode = { id: uid(), name, type: 'file', content: '// New file\n', language: getLangFromName(name) };
     const updated = addToTree(tree, parentId, newFile);
     pushHistory(updated);
     setTree(updated);
@@ -404,7 +461,8 @@ export const CodeEditor = ({ node, onClose }: Props) => {
   }, [tree, addToTree, pushHistory]);
 
   const handleAddRootFile = useCallback(() => {
-    const newFile: FileNode = { id: uid(), name: 'untitled.ts', type: 'file', content: '// New file\n', language: 'typescript' };
+    const name = 'untitled.ts';
+    const newFile: FileNode = { id: uid(), name, type: 'file', content: '// New file\n', language: getLangFromName(name) };
     const updated = [...tree, newFile];
     pushHistory(updated);
     setTree(updated);
