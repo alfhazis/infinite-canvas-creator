@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { findFreePosition } from '@/lib/layout';
 
 export interface ElementLink {
   /** CSS selector or data attribute identifying the element */
@@ -183,8 +184,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const source = nodes.find((n) => n.id === id);
     if (!source) return;
     const newId = `node-${++nodeCounter}-${Date.now()}`;
+    
+    const { x, y } = findFreePosition(
+      nodes,
+      source.width,
+      source.height,
+      source.x + 40,
+      source.y + 40,
+      40
+    );
+
     set((state) => ({
-      nodes: [...state.nodes, { ...source, id: newId, x: source.x + 40, y: source.y + 40, connectedTo: [], picked: false }],
+      nodes: [...state.nodes, { ...source, id: newId, x, y, connectedTo: [], picked: false }],
     }));
   },
 

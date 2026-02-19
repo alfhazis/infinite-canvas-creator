@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { generateFullPageVariations, getRandomVariation, generateSubSections } from './generateVariations';
+import { findFreePosition } from '@/lib/layout';
 import {
   Select,
   SelectContent,
@@ -121,20 +122,31 @@ export const CanvasNodeCard = ({ node }: Props) => {
         updateNode(node.id, { status: 'ready' });
         const variations = generateFullPageVariations(node.title, node.description, platform);
         
-        const count = variations.length;
-        const totalHeight = count * 340 + (count - 1) * 40;
-        const startY = node.y + (node.height || 150) / 2 - totalHeight / 2;
-        const newX = node.x + node.width + 200;
+        const nodeWidth = 420;
+        const nodeHeight = 340;
+        const padding = 80;
+        
+        const currentNodesState = useCanvasStore.getState().nodes;
+        let currentNodes = [...currentNodesState];
 
-        variations.forEach((variation, idx) => {
+        variations.forEach((variation) => {
+          const { x, y } = findFreePosition(
+            currentNodes,
+            nodeWidth,
+            nodeHeight,
+            node.x + node.width + padding,
+            node.y,
+            padding
+          );
+
           const newId = addNode({
             type: platform === 'api' ? 'api' : platform === 'cli' ? 'cli' : platform === 'database' ? 'database' : 'design',
             title: variation.label,
             description: variation.description,
-            x: newX,
-            y: startY + idx * 380,
-            width: 420,
-            height: 340,
+            x,
+            y,
+            width: nodeWidth,
+            height: nodeHeight,
             status: 'ready',
             generatedCode: variation.code,
             content: variation.previewHtml,
@@ -142,15 +154,26 @@ export const CanvasNodeCard = ({ node }: Props) => {
             pageRole: variation.category,
             platform,
           });
+
+          currentNodes.push({
+            id: newId,
+            x,
+            y,
+            width: nodeWidth,
+            height: nodeHeight
+          } as any);
+
           connectNodes(node.id, newId);
         });
 
-        // Auto-pan canvas to center between source and new nodes
-        const centerX = node.x + (newX + 420 - node.x) / 2;
-        const centerY = startY + totalHeight / 2;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        setPan(vw / 2 - centerX * zoom, vh / 2 - centerY * zoom);
+        // Auto-pan to show the area where nodes were added (roughly)
+        // We'll just pan to the first new node area for simplicity
+        if (currentNodes.length > currentNodesState.length) {
+          const firstNew = currentNodes[currentNodesState.length];
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          setPan(vw / 2 - (firstNew.x + nodeWidth/2) * zoom, vh / 2 - (firstNew.y + nodeHeight/2) * zoom);
+        }
       }, 1800);
     },
     [node.id, node.title, node.description, node.x, node.y, node.width, node.height, updateNode, addNode, connectNodes, setPan, zoom]
@@ -196,22 +219,31 @@ export const CanvasNodeCard = ({ node }: Props) => {
         updateNode(node.id, { status: 'ready' });
         const subSections = generateSubSections(node.title, node.platform || 'web');
 
-        const count = subSections.length;
-        const cardH = 260;
-        const gap = 30;
-        const totalHeight = count * cardH + (count - 1) * gap;
-        const startY = node.y + (node.height || 150) / 2 - totalHeight / 2;
+        const nodeWidth = 380;
+        const nodeHeight = 260;
+        const padding = 60;
 
-        const newX = node.x + node.width + 200;
-        subSections.forEach((section, idx) => {
+        const currentNodesState = useCanvasStore.getState().nodes;
+        let currentNodes = [...currentNodesState];
+
+        subSections.forEach((section) => {
+          const { x, y } = findFreePosition(
+            currentNodes,
+            nodeWidth,
+            nodeHeight,
+            node.x + node.width + padding,
+            node.y,
+            padding
+          );
+
           const newId = addNode({
             type: node.platform === 'api' ? 'api' : node.platform === 'cli' ? 'cli' : node.platform === 'database' ? 'database' : 'design',
             title: section.label,
             description: section.description,
-            x: newX,
-            y: startY + idx * (cardH + gap),
-            width: 380,
-            height: cardH,
+            x,
+            y,
+            width: nodeWidth,
+            height: nodeHeight,
             status: 'ready',
             generatedCode: section.code,
             content: section.previewHtml,
@@ -219,15 +251,24 @@ export const CanvasNodeCard = ({ node }: Props) => {
             pageRole: section.category,
             platform: node.platform,
           });
+
+          currentNodes.push({
+            id: newId,
+            x,
+            y,
+            width: nodeWidth,
+            height: nodeHeight
+          } as any);
+
           connectNodes(node.id, newId);
         });
 
-        // Auto-pan to center on new nodes
-        const centerX = node.x + (newX + 380 - node.x) / 2;
-        const centerY = startY + totalHeight / 2;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        setPan(vw / 2 - centerX * zoom, vh / 2 - centerY * zoom);
+        if (currentNodes.length > currentNodesState.length) {
+          const firstNew = currentNodes[currentNodesState.length];
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          setPan(vw / 2 - (firstNew.x + nodeWidth/2) * zoom, vh / 2 - (firstNew.y + nodeHeight/2) * zoom);
+        }
       }, 1500);
     },
     [node.id, node.title, node.x, node.y, node.width, node.height, node.platform, updateNode, addNode, connectNodes, setPan, zoom]
@@ -240,27 +281,37 @@ export const CanvasNodeCard = ({ node }: Props) => {
       setTimeout(() => {
         updateNode(node.id, { status: 'ready' });
         const previewHtml = buildRunPreview(node.title, node.description);
-        const newX = node.x + node.width + 80;
+        
+        const nodeWidth = 520;
+        const nodeHeight = 460;
+        const padding = 80;
+
+        const { x, y } = findFreePosition(
+          useCanvasStore.getState().nodes,
+          nodeWidth,
+          nodeHeight,
+          node.x + node.width + padding,
+          node.y,
+          padding
+        );
+
         const newId = addNode({
           type: 'code',
           title: '▶ ' + node.title,
           description: 'Live preview of the running application.',
-          x: newX,
-          y: node.y,
-          width: 520,
-          height: 460,
+          x,
+          y,
+          width: nodeWidth,
+          height: nodeHeight,
           status: 'running',
           generatedCode: previewHtml,
           content: previewHtml,
         });
         connectNodes(node.id, newId);
 
-        // Auto-pan to center between source and run node
-        const centerX = node.x + (newX + 520 - node.x) / 2;
-        const centerY = node.y + 230;
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        setPan(vw / 2 - centerX * zoom, vh / 2 - centerY * zoom);
+        setPan(vw / 2 - (x + nodeWidth/2) * zoom, vh / 2 - (y + nodeHeight/2) * zoom);
       }, 2500);
     },
     [node.id, node.title, node.description, node.x, node.y, node.width, updateNode, addNode, connectNodes, setPan, zoom]

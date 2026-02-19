@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Monitor, Smartphone, Layout, CreditCard, Star } from 'lucide-react';
 import { useCanvasStore, type UIVariation } from '@/stores/canvasStore';
+import { findFreePosition } from '@/lib/layout';
 
 const categoryIcons: Record<UIVariation['category'], typeof Monitor> = {
   header: Layout,
@@ -15,28 +16,37 @@ const categoryIcons: Record<UIVariation['category'], typeof Monitor> = {
 export const PreviewSelectionPanel = () => {
   const {
     previewPanelOpen, previewVariations, previewSourceNodeId,
-    closePreviewPanel, addNode, connectNodes, togglePick,
+    closePreviewPanel, addNode, connectNodes, togglePick, nodes
   } = useCanvasStore();
 
   if (!previewPanelOpen) return null;
 
   const handleSelect = (variation: UIVariation) => {
     if (!previewSourceNodeId) return;
-    const sourceNode = useCanvasStore.getState().nodes.find((n) => n.id === previewSourceNodeId);
+    const sourceNode = nodes.find((n) => n.id === previewSourceNodeId);
     if (!sourceNode) return;
 
-    const existingDesigns = useCanvasStore.getState().nodes.filter(
-      (n) => n.parentId === previewSourceNodeId
+    const nodeWidth = 380;
+    const nodeHeight = 320;
+    const padding = 80;
+
+    const { x, y } = findFreePosition(
+      nodes,
+      nodeWidth,
+      nodeHeight,
+      sourceNode.x + sourceNode.width + padding,
+      sourceNode.y,
+      padding
     );
 
     const newId = addNode({
       type: 'design',
       title: variation.label,
       description: variation.description,
-      x: sourceNode.x + sourceNode.width + 80,
-      y: sourceNode.y + existingDesigns.length * 400,
-      width: 380,
-      height: 320,
+      x,
+      y,
+      width: nodeWidth,
+      height: nodeHeight,
       status: 'ready',
       generatedCode: variation.code,
       content: variation.previewHtml,
@@ -46,10 +56,69 @@ export const PreviewSelectionPanel = () => {
     });
     connectNodes(previewSourceNodeId, newId);
     togglePick(newId);
+    return newId;
   };
 
   const handleSelectAll = () => {
-    previewVariations.forEach((v) => handleSelect(v));
+    // When selecting all, we want to place them in a more organized way
+    // We'll add them one by one, which findFreePosition will handle 
+    // because it uses the latest 'nodes' state (if we handle the state correctly)
+    
+    // However, since addNode is async-ish (zustand state update), 
+    // let's do it with a local copy of nodes to ensure no overlap between the new ones
+    let currentNodes = [...nodes];
+    const sourceNode = nodes.find((n) => n.id === previewSourceNodeId);
+    if (!sourceNode) return;
+
+    const nodeWidth = 380;
+    const nodeHeight = 320;
+    const padding = 80;
+
+    previewVariations.forEach((variation) => {
+      const { x, y } = findFreePosition(
+        currentNodes,
+        nodeWidth,
+        nodeHeight,
+        sourceNode.x + sourceNode.width + padding,
+        sourceNode.y,
+        padding
+      );
+
+      const newId = addNode({
+        type: 'design',
+        title: variation.label,
+        description: variation.description,
+        x,
+        y,
+        width: nodeWidth,
+        height: nodeHeight,
+        status: 'ready',
+        generatedCode: variation.code,
+        content: variation.previewHtml,
+        picked: true,
+        parentId: previewSourceNodeId,
+        pageRole: variation.category,
+      });
+
+      // Update local copy for next iteration
+      currentNodes.push({
+        id: newId,
+        type: 'design',
+        title: variation.label,
+        description: variation.description,
+        x,
+        y,
+        width: nodeWidth,
+        height: nodeHeight,
+        status: 'ready',
+        connectedTo: [previewSourceNodeId],
+        parentId: previewSourceNodeId
+      } as any);
+
+      connectNodes(previewSourceNodeId, newId);
+      togglePick(newId);
+    });
+
     closePreviewPanel();
   };
 

@@ -8,6 +8,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
+import { findFreePosition } from '@/lib/layout';
 
 /* ── Minimap ────────────────────────────────── */
 const Minimap = () => {
@@ -147,40 +148,61 @@ export const CanvasToolbar = () => {
 
   const handleAddIdea = useCallback(() => {
     if (!ideaText.trim()) return;
-    const nodeCount = nodes.length;
-    const col = nodeCount % 3;
-    const row = Math.floor(nodeCount / 3);
+    
+    const nodeWidth = 360;
+    const nodeHeight = 300;
+    const padding = 60;
+
+    const { x, y } = findFreePosition(
+      nodes,
+      nodeWidth,
+      nodeHeight,
+      100,
+      100,
+      padding
+    );
+
     addNode({
       type: 'idea',
       title: ideaText.trim(),
       description: 'Click "Generate" to create a design from this idea. The AI will produce multiple design variations you can run and preview.',
-      x: 100 + col * 480,
-      y: 100 + row * 460,
-      width: 360,
-      height: 300,
+      x,
+      y,
+      width: nodeWidth,
+      height: nodeHeight,
       status: 'idle',
     });
     setIdeaText('');
     setShowIdeaInput(false);
-  }, [ideaText, nodes.length, addNode]);
+  }, [ideaText, nodes, addNode]);
 
   const handleAddPlatformNode = useCallback((platform: CanvasNode['platform'], type: CanvasNode['type'], title: string, desc: string) => {
-    const nodeCount = nodes.length;
-    const col = nodeCount % 3;
-    const row = Math.floor(nodeCount / 3);
+    const nodeWidth = 360;
+    const nodeHeight = 300;
+    const padding = 60;
+
+    const { x, y } = findFreePosition(
+      nodes,
+      nodeWidth,
+      nodeHeight,
+      100,
+      100,
+      padding
+    );
+
     addNode({
       type,
       title,
       description: desc,
-      x: 100 + col * 480,
-      y: 100 + row * 460,
-      width: 360,
-      height: 300,
+      x,
+      y,
+      width: nodeWidth,
+      height: nodeHeight,
       status: 'idle',
       platform,
     });
     setShowAddMenu(false);
-  }, [nodes.length, addNode]);
+  }, [nodes, addNode]);
 
   // Close add menu on outside click
   useEffect(() => {
@@ -197,32 +219,54 @@ export const CanvasToolbar = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files) return;
-      Array.from(files).forEach((file, i) => {
+      
+      let currentNodes = [...nodes];
+      const padding = 60;
+      const nodeWidth = 360;
+      const nodeHeight = 300;
+
+      Array.from(files).forEach((file) => {
         const reader = new FileReader();
         reader.onload = (ev) => {
           const content = ev.target?.result as string;
-          const nodeCount = nodes.length + i;
-          const col = nodeCount % 3;
-          const row = Math.floor(nodeCount / 3);
-          addNode({
+          
+          const { x, y } = findFreePosition(
+            currentNodes,
+            nodeWidth,
+            nodeHeight,
+            100,
+            100,
+            padding
+          );
+
+          const newId = addNode({
             type: 'import',
             title: file.name.replace(/\.(tsx?|css)$/, ''),
             description: `Imported ${file.name} (${(file.size / 1024).toFixed(1)}KB)`,
-            x: 100 + col * 480,
-            y: 100 + row * 460,
-            width: 360,
-            height: 300,
+            x,
+            y,
+            width: nodeWidth,
+            height: nodeHeight,
             status: 'ready',
             content,
             fileName: file.name,
             generatedCode: content,
           });
+
+          // Update local copy for next file
+          currentNodes.push({
+            id: newId,
+            x,
+            y,
+            width: nodeWidth,
+            height: nodeHeight,
+          } as any);
         };
         reader.readAsText(file);
       });
       e.target.value = '';
     },
-    [nodes.length, addNode]
+    [nodes, addNode]
   );
 
   const handleExport = useCallback(() => {
