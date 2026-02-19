@@ -1,0 +1,171 @@
+-- Canvas IDE Initial Schema
+-- Creates all tables needed for the Rust backend
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email         TEXT NOT NULL UNIQUE,
+    password_hash TEXT,
+    display_name  TEXT NOT NULL DEFAULT '',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER set_users_timestamp
+BEFORE UPDATE ON users
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+-- Refresh tokens for JWT rotation
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash  TEXT NOT NULL UNIQUE,
+    expires_at  TIMESTAMPTZ NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
+
+-- Projects
+CREATE TABLE IF NOT EXISTS projects (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    zoom        DOUBLE PRECISION NOT NULL DEFAULT 1.0,
+    pan_x       DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    pan_y       DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    ai_model    TEXT NOT NULL DEFAULT 'auto',
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+
+CREATE TRIGGER set_projects_timestamp
+BEFORE UPDATE ON projects
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+-- Node type enums
+DO $$ BEGIN
+    CREATE TYPE node_type AS ENUM (
+        'idea', 'design', 'code', 'import',
+        'api', 'cli', 'database', 'payment', 'env'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE node_status AS ENUM (
+        'idle', 'generating', 'ready', 'running'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE node_platform AS ENUM (
+        'web', 'mobile', 'api', 'desktop', 'cli', 'database', 'env'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Canvas nodes - mirrors frontend CanvasNode interface
+CREATE TABLE IF NOT EXISTS canvas_nodes (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id      UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    client_id       TEXT NOT NULL,
+    node_type       node_type NOT NULL DEFAULT 'idea',
+    title           TEXT NOT NULL DEFAULT '',
+    description     TEXT NOT NULL DEFAULT '',
+    x               DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    y               DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    width           DOUBLE PRECISION NOT NULL DEFAULT 360.0,
+    height          DOUBLE PRECISION NOT NULL DEFAULT 300.0,
+    status          node_status NOT NULL DEFAULT 'idle',
+    content         TEXT,
+    file_name       TEXT,
+    generated_code  TEXT,
+    picked          BOOLEAN NOT NULL DEFAULT FALSE,
+    parent_id       TEXT,
+    page_role       TEXT,
+    tag             TEXT,
+    platform        node_platform,
+    language        TEXT,
+    ai_model        TEXT,
+    element_links   JSONB NOT NULL DEFAULT '[]'::jsonb,
+    env_vars        JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(project_id, client_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_canvas_nodes_project_id ON canvas_nodes(project_id);
+CREATE INDEX IF NOT EXISTS idx_canvas_nodes_client_id  ON canvas_nodes(client_id);
+
+CREATE TRIGGER set_canvas_nodes_timestamp
+BEFORE UPDATE ON canvas_nodes
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+-- Node connections (directed edges between nodes)
+CREATE TABLE IF NOT EXISTS node_connections (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id      UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    from_client_id  TEXT NOT NULL,
+    to_client_id    TEXT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(project_id, from_client_id, to_client_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_node_connections_project ON node_connections(project_id);
+CREATE INDEX IF NOT EXISTS idx_node_connections_from    ON node_connections(from_client_id);
+
+-- UI variation category enum
+DO $$ BEGIN
+    CREATE TYPE variation_category AS ENUM (
+        'header', 'hero', 'features', 'pricing',
+        'footer', 'dashboard', 'mobile'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- UI variations generated by AI
+CREATE TABLE IF NOT EXISTS ui_variations (
+    id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id            UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    source_node_client_id TEXT NOT NULL,
+    label                 TEXT NOT NULL,
+    description           TEXT NOT NULL DEFAULT '',
+    preview_html          TEXT NOT NULL DEFAULT '',
+    code                  TEXT NOT NULL DEFAULT '',
+    category              variation_category NOT NULL DEFAULT 'hero',
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_ui_variations_project     ON ui_variations(project_id);
+CREATE INDEX IF NOT EXISTS idx_ui_variations_source_node ON ui_variations(source_node_client_id);
+
+-- Encrypted user API keys (e.g. OpenRouter)
+CREATE TABLE IF NOT EXISTS user_api_keys (
+    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider      TEXT NOT NULL,
+    encrypted_key TEXT NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(user_id, provider)
+);
+
+CREATE TRIGGER set_user_api_keys_timestamp
+BEFORE UPDATE ON user_api_keys
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
