@@ -868,28 +868,17 @@ export const CanvasNodeCard = ({ node }: Props) => {
       </div>
 
       {/* Visual Editor overlay - rendered via portal for true fullscreen */}
-      {showVisualEditor && node.type === 'api' && createPortal(
-        <ApiVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
-        document.body
-      )}
-      {showVisualEditor && node.type === 'cli' && createPortal(
-        <CliVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
-        document.body
-      )}
-      {showVisualEditor && node.type === 'database' && createPortal(
-        <DatabaseVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
-        document.body
-      )}
-      {showVisualEditor && node.type === 'payment' && createPortal(
-        <PaymentVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
-        document.body
-      )}
-      {showVisualEditor && node.type === 'env' && createPortal(
-        <EnvVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
-        document.body
-      )}
-      {showVisualEditor && node.type !== 'api' && node.type !== 'cli' && node.type !== 'database' && node.type !== 'payment' && createPortal(
-        <VisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
+      {showVisualEditor && createPortal(
+        <>
+          {node.type === 'api' && <ApiVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />}
+          {node.type === 'cli' && <CliVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />}
+          {node.type === 'database' && <DatabaseVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />}
+          {node.type === 'payment' && <PaymentVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />}
+          {node.type === 'env' && <EnvVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />}
+          {node.type !== 'api' && node.type !== 'cli' && node.type !== 'database' && node.type !== 'payment' && node.type !== 'env' && (
+            <VisualEditor node={node} onClose={() => setShowVisualEditor(false)} />
+          )}
+        </>,
         document.body
       )}
       {showCodeEditor && createPortal(
