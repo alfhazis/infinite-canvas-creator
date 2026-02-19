@@ -73,6 +73,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
   const [showVisualEditor, setShowVisualEditor] = useState(false);
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [showApiLangPicker, setShowApiLangPicker] = useState(false);
+  const [variationCount, setVariationCount] = useState<2 | 3 | 4>(3);
   const [subUiPrompt, setSubUiPrompt] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -141,12 +142,14 @@ export const CanvasNodeCard = ({ node }: Props) => {
       try {
         let variations;
         if (useAI) {
-          const aiVariation = await generateFullPageWithAI(node.title, node.description, platform, openRouterKey!, aiModel);
-          variations = [aiVariation];
+          const promises = Array.from({ length: variationCount }).map(() => 
+            generateFullPageWithAI(node.title, node.description, platform, openRouterKey!, aiModel)
+          );
+          variations = await Promise.all(promises);
         } else {
           // Add a small delay for simulated "static" generation to feel better
           await new Promise(r => setTimeout(r, 1200));
-          variations = generateFullPageVariations(node.title, node.description, platform);
+          variations = generateFullPageVariations(node.title, node.description, platform).slice(0, variationCount);
         }
 
         updateNode(node.id, { status: 'ready' });
@@ -610,15 +613,27 @@ export const CanvasNodeCard = ({ node }: Props) => {
                 )}
 
                 {/* IDEA node: Generate with platform picker */}
-                {node.type === 'idea' && node.status === 'idle' && !showPlatformPicker && (
-                  <button onClick={(e) => { e.stopPropagation(); setShowPlatformPicker(true); }} className="brand-button flex-1 flex items-center justify-center gap-2 !py-3">
-                    <Sparkles className="w-3 h-3" /> Generate
-                  </button>
-                )}
-                {node.type === 'idea' && node.status === 'ready' && !showPlatformPicker && (
-                  <button onClick={(e) => { e.stopPropagation(); setShowPlatformPicker(true); }} className="brand-button flex-1 flex items-center justify-center gap-2 !py-3">
-                    <Sparkles className="w-3 h-3" /> Re-Generate
-                  </button>
+                {node.type === 'idea' && (node.status === 'idle' || node.status === 'ready') && !showPlatformPicker && (
+                  <div className="flex gap-1.5 flex-1" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={(e) => { e.stopPropagation(); setShowPlatformPicker(true); }} className="brand-button flex-1 flex items-center justify-center gap-2 !py-3">
+                      <Sparkles className="w-3 h-3" /> {node.status === 'idle' ? 'Generate' : 'Re-Generate'}
+                    </button>
+                    
+                    <div className="flex flex-col gap-1 items-center bg-secondary/30 p-1 rounded-xl border border-border/50">
+                      <p className="text-[7px] font-black uppercase tracking-tighter text-muted-foreground">Variations</p>
+                      <div className="flex gap-0.5">
+                        {[2, 3, 4].map((num) => (
+                          <button
+                            key={num}
+                            onClick={() => setVariationCount(num as any)}
+                            className={`w-6 h-6 rounded-lg text-[9px] font-black transition-all ${variationCount === num ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-primary/10 text-muted-foreground'}`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 {/* Platform picker */}

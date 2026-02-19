@@ -160,6 +160,37 @@ function webLandingVariation3(title: string, desc: string): UIVariation {
   };
 }
 
+function webLandingVariation4(title: string, desc: string): UIVariation {
+  return {
+    id: `var-${++variationCounter}`,
+    label: title + ' — Style D',
+    description: 'Minimalist editorial landing page with large typography, single-col grid, and wide whitespace.',
+    category: 'hero',
+    previewHtml: fullPageHtml([
+      // Minimal Header
+      '<nav style="padding:40px;display:flex;justify-content:center;border-bottom:1px solid #f1f5f9;">' +
+      '<span style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.3em;">' + title + '</span></nav>',
+      // Editorial Hero
+      '<section style="padding:120px 40px;text-align:center;">' +
+      '<h1 style="font-size:64px;font-weight:300;margin-bottom:24px;letter-spacing:-0.05em;">' + title + '</h1>' +
+      '<p style="max-width:480px;margin:0 auto 48px;font-size:16px;color:#64748b;line-height:1.6;font-weight:300;">' + desc + '</p>' +
+      '<button class="btn-primary" style="background:#000;border-radius:0;padding:16px 48px;">Discover</button></section>',
+      // Single column large features
+      '<section style="padding:80px 40px;background:#fafafa;">' +
+      ['The Vision', 'The Strategy', 'The Future'].map(f => 
+        '<div style="max-width:600px;margin:0 auto 120px;text-align:left;">' +
+        '<h2 style="font-size:24px;font-weight:900;margin-bottom:16px;">' + f + '</h2>' +
+        '<p style="font-size:16px;line-height:2;">Our commitment to excellence drives every decision we make. We believe in building products that stand the test of time through rigorous design and engineering.</p></div>'
+      ).join('') +
+      '</section>',
+      // Dark minimal footer
+      '<footer style="padding:80px 40px;background:#000;color:#666;text-align:center;">' +
+      '<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;">' + title + ' &copy; 2026</p></footer>'
+    ]),
+    code: '// Landing page variation D for ' + title,
+  };
+}
+
 /* ═══════════════════════════════════════════════════
    FULL PAGE VARIATIONS — MOBILE
    ═══════════════════════════════════════════════════ */
@@ -270,6 +301,32 @@ function mobileLandingVariation3(title: string, desc: string): UIVariation {
   };
 }
 
+function mobileLandingVariation4(title: string, desc: string): UIVariation {
+  return {
+    id: `var-${++variationCounter}`,
+    label: title + ' — Mobile D',
+    description: 'Clean dark-mode mobile app with large cards and accent gradients.',
+    category: 'mobile',
+    previewHtml: fullPageHtml([
+      '<div style="min-height:100vh;display:flex;flex-direction:column;background:#0a0a0f;color:#fff;">',
+      '<div style="padding:12px 20px;display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:#94a3b8;"><span>9:41</span><span>···</span></div>',
+      '<div style="padding:20px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">' +
+      '<h1 style="font-size:24px;font-weight:900;">' + title + '</h1>' +
+      '<div style="width:40px;height:40px;border-radius:14px;background:#1e1e2e;display:flex;align-items:center;justify-content:center;">🔔</div></div>' +
+      '<div style="padding:24px;border-radius:24px;background:linear-gradient(135deg,#6366f120,#8b5cf620);border:1px solid #6366f130;margin-bottom:24px;">' +
+      '<p style="font-size:12px;color:#a5b4fc;margin-bottom:8px;">Project Health</p><h2 style="font-size:32px;font-weight:900;">94%</h2></div>',
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">',
+      ...['Tasks', 'Events', 'Files', 'Logs'].map(f => 
+        '<div style="padding:20px;border-radius:20px;background:#1e1e2e;border:1px solid #2e2e3e;">' +
+        '<p style="font-size:10px;font-weight:900;color:#64748b;text-transform:uppercase;margin-bottom:4px;">' + f + '</p>' +
+        '<p style="font-size:18px;font-weight:900;">' + Math.floor(Math.random()*100) + '</p></div>'
+      ),
+      '</div></div></div>',
+    ], true),
+    code: '// Mobile variation D for ' + title,
+  };
+}
+
 /* ═══════════════════════════════════════════════════
    API VARIATIONS
    ═══════════════════════════════════════════════════ */
@@ -354,6 +411,30 @@ function apiVariation3(title: string, desc: string): UIVariation {
   };
 }
 
+function apiVariation4(title: string, desc: string): UIVariation {
+  return {
+    id: `var-${++variationCounter}`, label: title + ' — gRPC API', description: 'High-performance gRPC API with Protobuf definitions.', category: 'dashboard',
+    previewHtml: apiDocHtml(
+      '<div style="padding:20px;border-bottom:1px solid #1e1e2e;"><h1 style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px;">' + title + ' gRPC</h1><p style="font-size:12px;color:#64748b;">Protocol Buffers API definition</p></div>' +
+      '<div class="section-title">📂 proto/' + title.toLowerCase() + '.proto</div>' +
+      '<div style="padding:20px;font-family:monospace;color:#6366f1;line-height:1.6;">' +
+      'syntax = "proto3";<br/><br/>' +
+      'service ' + title.replace(/\s+/g, '') + 'Service {<br/>' +
+      '&nbsp;&nbsp;rpc GetItem(GetItemRequest) returns (Item) {}<br/>' +
+      '&nbsp;&nbsp;rpc ListItems(ListItemsRequest) returns (stream Item) {}<br/>' +
+      '&nbsp;&nbsp;rpc CreateItem(CreateItemRequest) returns (Item) {}<br/>' +
+      '}<br/><br/>' +
+      'message Item {<br/>' +
+      '&nbsp;&nbsp;string id = 1;<br/>' +
+      '&nbsp;&nbsp;string name = 2;<br/>' +
+      '&nbsp;&nbsp;int32 value = 3;<br/>' +
+      '}' +
+      '</div>'
+    ),
+    code: '// gRPC API for ' + title,
+  };
+}
+
 /* ═══════════════════════════════════════════════════
    DESKTOP VARIATIONS
    ═══════════════════════════════════════════════════ */
@@ -396,12 +477,52 @@ function desktopVariation2(title: string, desc: string): UIVariation {
   };
 }
 
+function desktopVariation3(title: string, desc: string): UIVariation {
+  return {
+    id: `var-${++variationCounter}`, label: title + ' — Creative Suite', description: 'Creative software UI with toolbar, layers, and canvas.', category: 'dashboard',
+    previewHtml: fullPageHtml([
+      '<div style="display:flex;height:100vh;background:#1e1e1e;color:#ccc;font-size:11px;">',
+      '<div style="width:48px;background:#252525;border-right:1px solid #111;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:16px;">' +
+      ['⬈', '✎', '✂', '▭', '◯', 'T', '🔍'].map(i => '<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;">' + i + '</div>').join('') + '</div>',
+      '<div style="flex:1;display:flex;flex-direction:column;">',
+      '<div style="height:32px;background:#252525;border-bottom:1px solid #111;display:flex;align-items:center;padding:0 12px;gap:20px;">' +
+      '<span>File</span><span>Edit</span><span>Image</span><span>Layer</span><span>Window</span></div>',
+      '<div style="flex:1;background:#111;display:flex;align-items:center;justify-content:center;"><div style="width:80%;height:80%;background:#fff;box-shadow:0 0 40px rgba(0,0,0,0.5);"></div></div>',
+      '</div>',
+      '<div style="width:240px;background:#252525;border-left:1px solid #111;padding:12px;display:flex;flex-direction:column;gap:12px;">' +
+      '<div style="border:1px solid #333;padding:8px;border-radius:4px;">PROPERTIES</div>' +
+      '<div style="flex:1;border:1px solid #333;padding:8px;border-radius:4px;">LAYERS<br/><br/><div style="background:#333;padding:6px;border-radius:4px;margin-bottom:4px;">Layer 1</div><div style="padding:6px;">Background</div></div></div>' +
+      '</div>',
+    ]),
+    code: '// Creative desktop for ' + title,
+  };
+}
+
+function desktopVariation4(title: string, desc: string): UIVariation {
+  return {
+    id: `var-${++variationCounter}`, label: title + ' — Dashboard App', description: 'Professional dashboard with widgets, charts, and activity.', category: 'dashboard',
+    previewHtml: fullPageHtml([
+      '<div style="display:flex;height:100vh;background:#f8fafc;">',
+      '<div style="width:64px;background:#0f172a;display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:20px;">' +
+      ['✦', '🏠', '📊', '👥', '⚙️'].map(i => '<div style="color:#94a3b8;font-size:20px;">' + i + '</div>').join('') + '</div>',
+      '<div style="flex:1;display:flex;flex-direction:column;">',
+      '<header style="height:64px;background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;display:flex;align-items:center;justify-content:space-between;">' +
+      '<span style="font-weight:800;">' + title + '</span><div style="width:32px;height:32px;border-radius:50%;background:#e2e8f0;"></div></header>',
+      '<main style="flex:1;padding:24px;overflow:auto;"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px;">',
+      ...[1,2,3].map(() => '<div class="card" style="height:100px;"></div>'),
+      '</div>',
+      '<div class="card" style="height:300px;"></div></main></div></div>',
+    ]),
+    code: '// Dashboard desktop for ' + title,
+  };
+}
+
 /* ═══════════════════════════════════════════════════
    CLI VARIATIONS
    ═══════════════════════════════════════════════════ */
 
 function cliVariation1(title: string, desc: string): UIVariation {
-  const cmd = title.toLowerCase().replace(/\\s+/g, '-');
+  const cmd = title.toLowerCase().replace(/\s+/g, '-');
   return {
     id: `var-${++variationCounter}`, label: title + ' — CLI Tool', description: 'CLI with subcommands, flags, and colored output.', category: 'dashboard',
     previewHtml: apiDocHtml(
@@ -428,7 +549,7 @@ function cliVariation1(title: string, desc: string): UIVariation {
 }
 
 function cliVariation2(title: string, desc: string): UIVariation {
-  const cmd = title.toLowerCase().replace(/\\s+/g, '-');
+  const cmd = title.toLowerCase().replace(/\s+/g, '-');
   return {
     id: `var-${++variationCounter}`, label: title + ' — Interactive CLI', description: 'Interactive CLI with prompts and progress.', category: 'dashboard',
     previewHtml: apiDocHtml(
@@ -447,6 +568,48 @@ function cliVariation2(title: string, desc: string): UIVariation {
       '<div style="color:#94a3b8;margin-top:8px;font-size:11px;">cd my-project && bun dev</div></div>'
     ),
     code: '// Interactive CLI for ' + title,
+  };
+}
+
+function cliVariation3(title: string, desc: string): UIVariation {
+  const cmd = title.toLowerCase().replace(/\s+/g, '-');
+  return {
+    id: `var-${++variationCounter}`, label: title + ' — Build Tool', description: 'CLI focused on build pipelines and deployment logs.', category: 'dashboard',
+    previewHtml: apiDocHtml(
+      '<div style="padding:20px;font-family:monospace;">' +
+      '<div style="color:#6366f1;">$ ' + cmd + ' build --prod</div>' +
+      '<div style="margin:12px 0;">' +
+      '⠋ Compiling source...<br/>' +
+      '⠙ Optimizing assets...<br/>' +
+      '⠹ Generating static pages...<br/>' +
+      '<span style="color:#059669;">✓ Build complete in 4.2s</span></div>' +
+      '<div style="border:1px solid #1e1e2e;padding:12px;border-radius:4px;margin-top:12px;">' +
+      'File &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Size &nbsp;&nbsp; Gzip<br/>' +
+      '--------------------------------------<br/>' +
+      'dist/index.html &nbsp;&nbsp;&nbsp;&nbsp; 4.2kB &nbsp; 1.5kB<br/>' +
+      'dist/assets/app.js &nbsp; 124kB &nbsp; 42.1kB</div></div>'
+    ),
+    code: '// Build CLI for ' + title,
+  };
+}
+
+function cliVariation4(title: string, desc: string): UIVariation {
+  const cmd = title.toLowerCase().replace(/\s+/g, '-');
+  return {
+    id: `var-${++variationCounter}`, label: title + ' — Monitoring CLI', description: 'CLI with real-time logs and system stats.', category: 'dashboard',
+    previewHtml: apiDocHtml(
+      '<div style="padding:20px;font-family:monospace;">' +
+      '<div style="color:#6366f1;">$ ' + cmd + ' monitor</div>' +
+      '<div style="display:flex;gap:20px;margin:12px 0;border-bottom:1px solid #1e1e2e;padding-bottom:12px;">' +
+      '<div>CPU: <span style="color:#059669;">24%</span></div>' +
+      '<div>MEM: <span style="color:#f59e0b;">1.2GB</span></div>' +
+      '<div>NET: <span style="color:#3b82f6;">45kb/s</span></div></div>' +
+      '<div>' +
+      '[14:02:21] INFO: Request handled in 4ms<br/>' +
+      '[14:02:24] <span style="color:#f59e0b;">WARN</span>: Memory spike detected<br/>' +
+      '[14:02:25] INFO: Cache cleared</div></div>'
+    ),
+    code: '// Monitoring CLI for ' + title,
   };
 }
 
@@ -538,6 +701,48 @@ function databaseVariation2(title: string, desc: string): UIVariation {
   };
 }
 
+function databaseVariation3(title: string, desc: string): UIVariation {
+  const schema = {
+    tables: [
+      { id: 'tbl-1', name: 'orgs', color: '#10b981', x: 50, y: 50, columns: [
+        { id: 'c1', name: 'id', type: 'uuid', isPrimary: true, isNullable: false, isUnique: true, defaultValue: 'gen_random_uuid()' },
+        { id: 'c2', name: 'slug', type: 'varchar', isPrimary: false, isNullable: false, isUnique: true, defaultValue: '' },
+      ] },
+      { id: 'tbl-2', name: 'projects', color: '#6366f1', x: 350, y: 50, columns: [
+        { id: 'c3', name: 'id', type: 'uuid', isPrimary: true, isNullable: false, isUnique: true, defaultValue: 'gen_random_uuid()' },
+        { id: 'c4', name: 'org_id', type: 'uuid', isPrimary: false, isNullable: false, isUnique: false, defaultValue: '', reference: { tableId: 'tbl-1', columnId: 'c1' } },
+        { id: 'c5', name: 'name', type: 'varchar', isPrimary: false, isNullable: false, isUnique: false, defaultValue: '' },
+      ] },
+    ],
+    relations: [
+      { id: 'r1', fromTableId: 'tbl-2', fromColumnId: 'c4', toTableId: 'tbl-1', toColumnId: 'c1', type: 'one-to-many' },
+    ],
+  };
+  return {
+    id: `var-${++variationCounter}`, label: title + ' — SaaS Schema', description: 'Multi-tenant SaaS database with orgs and projects.', category: 'dashboard',
+    previewHtml: buildDbPreview(schema, title + ' SaaS Schema'),
+    code: JSON.stringify(schema, null, 2),
+  };
+}
+
+function databaseVariation4(title: string, desc: string): UIVariation {
+  const schema = {
+    tables: [
+      { id: 'tbl-1', name: 'events', color: '#f59e0b', x: 50, y: 50, columns: [
+        { id: 'c1', name: 'id', type: 'bigint', isPrimary: true, isNullable: false, isUnique: true, defaultValue: '' },
+        { id: 'c2', name: 'type', type: 'varchar', isPrimary: false, isNullable: false, isUnique: false, defaultValue: '' },
+        { id: 'c3', name: 'payload', type: 'jsonb', isPrimary: false, isNullable: false, isUnique: false, defaultValue: '{}' },
+      ] },
+    ],
+    relations: [],
+  };
+  return {
+    id: `var-${++variationCounter}`, label: title + ' — Event Log', description: 'Simple event logging database with JSONB support.', category: 'dashboard',
+    previewHtml: buildDbPreview(schema, title + ' Event Log'),
+    code: JSON.stringify(schema, null, 2),
+  };
+}
+
 function buildDbPreview(schema: any, title: string): string {
   const tablesHtml = schema.tables.map((t: any) => {
     const colsHtml = t.columns.map((c: any) =>
@@ -570,6 +775,7 @@ export function generateFullPageVariations(
       webLandingVariation1(title, desc),
       webLandingVariation2(title, desc),
       webLandingVariation3(title, desc),
+      webLandingVariation4(title, desc),
     ];
   }
   if (platform === 'mobile') {
@@ -577,6 +783,7 @@ export function generateFullPageVariations(
       mobileLandingVariation1(title, desc),
       mobileLandingVariation2(title, desc),
       mobileLandingVariation3(title, desc),
+      mobileLandingVariation4(title, desc),
     ];
   }
   if (platform === 'api') {
@@ -584,21 +791,31 @@ export function generateFullPageVariations(
       apiVariation1(title, desc),
       apiVariation2(title, desc),
       apiVariation3(title, desc),
+      apiVariation4(title, desc),
     ];
   }
   if (platform === 'desktop') {
     return [
       desktopVariation1(title, desc),
       desktopVariation2(title, desc),
+      desktopVariation3(title, desc),
+      desktopVariation4(title, desc),
     ];
   }
   if (platform === 'database') {
-    return [databaseVariation1(title, desc), databaseVariation2(title, desc)];
+    return [
+      databaseVariation1(title, desc), 
+      databaseVariation2(title, desc),
+      databaseVariation3(title, desc),
+      databaseVariation4(title, desc),
+    ];
   }
   // cli
   return [
     cliVariation1(title, desc),
     cliVariation2(title, desc),
+    cliVariation3(title, desc),
+    cliVariation4(title, desc),
   ];
 }
 
