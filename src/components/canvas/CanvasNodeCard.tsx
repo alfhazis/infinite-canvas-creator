@@ -90,7 +90,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
     
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const newHeight = Math.round(entry.contentRect.height + 40); // account for padding/header
+        const newHeight = Math.round(entry.contentRect.height + 80); // account for padding/header
         if (Math.abs(newHeight - (node.height || 0)) > 10) {
           // Use requestAnimationFrame to avoid "ResizeObserver loop limit exceeded" error
           // by pushing the state update to the next frame
@@ -375,7 +375,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       onMouseDown={handleMouseDown}
     >
-      <div ref={cardRef} className={`node-card p-5 relative ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${node.picked ? 'ring-2 ring-emerald-500/60 ring-offset-2 ring-offset-background' : ''}`}>
+      <div ref={cardRef} className={`node-card px-5 py-10 relative ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${node.picked ? 'ring-2 ring-emerald-500/60 ring-offset-2 ring-offset-background' : ''}`}>
         
         {/* Connection handles - left */}
         <button

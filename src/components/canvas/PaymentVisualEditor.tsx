@@ -264,7 +264,7 @@ export const PaymentVisualEditor = ({ node, onClose }: Props) => {
       transition={{ duration: 0.2 }}
     >
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/90 backdrop-blur shrink-0">
+      <div className="flex items-center justify-between px-4 py-7 border-b border-border bg-card/90 backdrop-blur shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowLeftPanel(!showLeftPanel)}

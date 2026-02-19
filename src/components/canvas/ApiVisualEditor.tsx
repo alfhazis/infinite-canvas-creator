@@ -403,7 +403,7 @@ export const ApiVisualEditor = ({ node, onClose }: Props) => {
       transition={{ duration: 0.2 }}
     >
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/90 backdrop-blur shrink-0">
+      <div className="flex items-center justify-between px-4 py-7 border-b border-border bg-card/90 backdrop-blur shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowLeftPanel(!showLeftPanel)}
@@ -721,7 +721,7 @@ export const ApiVisualEditor = ({ node, onClose }: Props) => {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between px-4 py-1.5 border-t border-border bg-card/90 text-[9px] font-bold text-muted-foreground">
+      <div className="flex items-center justify-between px-4 py-[26px] border-t border-border bg-card/90 text-[9px] font-bold text-muted-foreground">
         <div className="flex items-center gap-3">
           <span>📡 {endpoints.length} endpoint{endpoints.length !== 1 ? 's' : ''}</span>
           <span>•</span>

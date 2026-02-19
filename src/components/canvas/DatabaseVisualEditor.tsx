@@ -858,7 +858,7 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col" style={{ background: '#0a0a0f' }}>
       {/* ─── Top Bar ─── */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/10" style={{ background: '#0f0f15' }}>
+      <div className="flex items-center justify-between px-4 py-7 border-b border-white/10" style={{ background: '#0f0f15' }}>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowLeftPanel(!showLeftPanel)} className={`p-2 rounded-lg hover:bg-white/5 transition-colors ${showLeftPanel ? 'text-cyan-400' : 'text-white/30'}`} title="Toggle Elements">
             <PanelLeft className="w-4 h-4" />
