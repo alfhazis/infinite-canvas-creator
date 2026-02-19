@@ -6,7 +6,7 @@ import {
   Edit3, Check, X, Copy, Tag, RefreshCw,
   MoreHorizontal, Lock, Unlock, Minimize2, Maximize2, ChevronDown,
   Smartphone, Globe, ArrowRight, Layers, Pencil, Server, MonitorDot, Terminal, Database, Code2, Link2,
-  Cpu
+  Cpu, CreditCard
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { generateFullPageVariations, getRandomVariation, generateSubSections } from './generateVariations';
