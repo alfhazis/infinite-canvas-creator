@@ -1,19 +1,55 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Key, Shield, ChevronDown, Check, Globe, Zap, AlertCircle } from 'lucide-react';
+import { X, Key, Shield, Globe, AlertCircle, Check, Loader2, LogOut } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvasStore';
+import { useAuthStore } from '@/stores/authStore';
 import { fetchOpenRouterModels } from '@/lib/openrouter';
+import { saveOpenRouterKey, loadOpenRouterKey, deleteOpenRouterKey } from '@/lib/projectsApi';
 import { ModelSelector } from './ModelSelector';
 
 export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
-  const { openRouterKey, setOpenRouterKey, aiModel, setAiModel, availableModels, setAvailableModels } = useCanvasStore();
+  const { openRouterKey, setOpenRouterKey, availableModels, setAvailableModels } = useCanvasStore();
+  const { user, signOut } = useAuthStore();
   const [key, setKey] = useState(openRouterKey || '');
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSaveKey = () => {
-    setOpenRouterKey(key.trim() || null);
+  useEffect(() => {
+    loadOpenRouterKey()
+      .then((k) => {
+        if (k) {
+          setKey(k);
+          setOpenRouterKey(k);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (availableModels.length === 0) handleFetchModels();
+  }, []);
+
+  const handleSaveKey = async () => {
+    setSaving(true);
     setError(null);
+    try {
+      const trimmed = key.trim();
+      if (trimmed) {
+        await saveOpenRouterKey(trimmed);
+        setOpenRouterKey(trimmed);
+      } else {
+        await deleteOpenRouterKey();
+        setOpenRouterKey(null);
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setError('Failed to save key. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleFetchModels = async () => {
@@ -22,18 +58,12 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
     try {
       const models = await fetchOpenRouterModels();
       setAvailableModels(models);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch models. Check your connection.');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (availableModels.length === 0) {
-      handleFetchModels();
-    }
-  }, []);
 
   return (
     <motion.div
@@ -66,15 +96,29 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <div className="space-y-8">
-          {/* API Key Section */}
+          {user && (
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary border border-border">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Signed in as</p>
+                <p className="text-xs font-bold text-foreground mt-0.5">{user.email}</p>
+              </div>
+              <button
+                onClick={async () => { await signOut(); onClose(); }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <LogOut className="w-3 h-3" /> Sign Out
+              </button>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-black uppercase tracking-widest text-foreground flex items-center gap-2">
                 <Shield className="w-3 h-3 text-primary" /> OpenRouter API Key
               </label>
-              <a 
-                href="https://openrouter.ai/keys" 
-                target="_blank" 
+              <a
+                href="https://openrouter.ai/keys"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-[9px] font-bold text-primary hover:underline uppercase tracking-widest"
               >
@@ -89,25 +133,26 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 placeholder="sk-or-v1-..."
                 className="brand-input flex-1 !py-3 font-mono text-xs"
               />
-              <button 
+              <button
                 onClick={handleSaveKey}
-                className="px-4 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                disabled={saving}
+                className="px-4 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-60 flex items-center gap-1.5"
               >
-                Save
+                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : saved ? <Check className="w-3 h-3" /> : null}
+                {saved ? 'Saved' : 'Save'}
               </button>
             </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed italic">
-              Your API key is stored locally in your browser and never sent to our servers.
+              Your API key is stored securely in your account.
             </p>
           </div>
 
-          {/* Model Selection Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-black uppercase tracking-widest text-foreground flex items-center gap-2">
                 <Globe className="w-3 h-3 text-primary" /> Default AI Model
               </label>
-              <button 
+              <button
                 onClick={handleFetchModels}
                 disabled={loading}
                 className="text-[9px] font-bold text-primary hover:underline uppercase tracking-widest disabled:opacity-50"
@@ -115,14 +160,10 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
                 {loading ? 'Refreshing...' : 'Refresh List'}
               </button>
             </div>
-
-            <div className="grid gap-2">
-              <ModelSelector className="!h-12 !text-xs" />
-            </div>
-
+            <ModelSelector className="!h-12 !text-xs" />
             {error && (
               <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center gap-3">
-                <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
                 <p className="text-[10px] font-bold text-destructive leading-tight">{error}</p>
               </div>
             )}
@@ -130,7 +171,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <div className="mt-8 pt-6 border-t border-border">
-          <button 
+          <button
             onClick={onClose}
             className="w-full py-4 rounded-xl bg-secondary text-foreground text-[10px] font-black uppercase tracking-widest hover:bg-secondary/80 transition-all border border-border"
           >

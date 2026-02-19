@@ -5,11 +5,13 @@ import {
   Search, X, Layers, Moon, Sun, Copy, Trash2,
   Code, FileCode, Grid3X3, Keyboard, Download, Eye, Package,
   Plus, Globe, Smartphone, Server, Terminal, Database, Monitor, ChevronUp,
-  CreditCard, Settings, Key
+  CreditCard, Settings, Key, FolderOpen, Save, Loader2, Check
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { findFreePosition } from '@/lib/layout';
 import { SettingsModal } from './SettingsModal';
+import { ProjectsPanel } from './ProjectsPanel';
+import { useProjectStore } from '@/stores/projectStore';
 
 /* ── Minimap ────────────────────────────────── */
 const Minimap = () => {
@@ -115,6 +117,8 @@ export const CanvasToolbar = () => {
   } = useCanvasStore();
   const pickedCount = nodes.filter((n) => n.picked).length;
 
+  const { activeProjectId, saving, lastSavedAt, saveCurrentCanvas } = useProjectStore();
+
   const [showIdeaInput, setShowIdeaInput] = useState(false);
   const [ideaText, setIdeaText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -122,14 +126,22 @@ export const CanvasToolbar = () => {
   const [showMinimap, setShowMinimap] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
 
-  // Apply dark mode to html
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
+
+  useEffect(() => {
+    if (!activeProjectId) return;
+    const timer = setTimeout(() => {
+      saveCurrentCanvas();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [nodes, activeProjectId]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -328,6 +340,15 @@ export const CanvasToolbar = () => {
           <span className="brand-label text-muted-foreground">
             {nodes.length} nodes
           </span>
+          {activeProjectId && (
+            <span className="flex items-center gap-1 text-[9px] font-bold text-muted-foreground">
+              {saving ? (
+                <><Loader2 className="w-2.5 h-2.5 animate-spin" /> Saving</>
+              ) : lastSavedAt ? (
+                <><Check className="w-2.5 h-2.5 text-green-500" /> Saved</>
+              ) : null}
+            </span>
+          )}
         </div>
 
         {/* Search */}
@@ -494,6 +515,7 @@ export const CanvasToolbar = () => {
           <ToolButton icon={Eye} label="Minimap" onClick={() => setShowMinimap(!showMinimap)} active={showMinimap} />
           <ToolButton icon={darkMode ? Sun : Moon} label="Theme (D)" onClick={toggleDarkMode} />
           <ToolButton icon={Download} label="Export JSON" onClick={handleExport} />
+          <ToolButton icon={FolderOpen} label="Projects" onClick={() => setShowProjects(true)} active={showProjects} />
           <ToolButton icon={Keyboard} label="Shortcuts" onClick={() => setShowShortcuts(true)} />
           <ToolButton icon={Settings} label="Settings" onClick={() => setShowSettings(true)} active={showSettings} />
 
@@ -523,6 +545,11 @@ export const CanvasToolbar = () => {
       {/* Settings modal */}
       <AnimatePresence>
         {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      </AnimatePresence>
+
+      {/* Projects panel */}
+      <AnimatePresence>
+        {showProjects && <ProjectsPanel onClose={() => setShowProjects(false)} />}
       </AnimatePresence>
 
       {/* Clear all */}

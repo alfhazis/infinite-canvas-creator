@@ -1,8 +1,11 @@
+import { useEffect } from 'react';
 import { InfiniteCanvas } from '@/components/canvas/InfiniteCanvas';
 import { CanvasToolbar } from '@/components/canvas/CanvasToolbar';
 import { PreviewSelectionPanel } from '@/components/canvas/PreviewSelectionPanel';
 import { AssemblyPanel } from '@/components/canvas/AssemblyPanel';
 import { useCanvasStore } from '@/stores/canvasStore';
+import { useProjectStore } from '@/stores/projectStore';
+import { loadOpenRouterKey } from '@/lib/projectsApi';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const ConnectingOverlay = () => {
@@ -28,6 +31,17 @@ const ConnectingOverlay = () => {
 };
 
 const Index = () => {
+  const { setOpenRouterKey } = useCanvasStore();
+  const { fetchProjects } = useProjectStore();
+
+  useEffect(() => {
+    loadOpenRouterKey()
+      .then((key) => { if (key) setOpenRouterKey(key); })
+      .catch(() => {});
+
+    fetchProjects();
+  }, []);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
       <InfiniteCanvas />
