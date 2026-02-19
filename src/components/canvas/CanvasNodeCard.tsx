@@ -5,10 +5,18 @@ import {
   Sparkles, Code, FileCode, Upload, Play, Trash2, Monitor, Star,
   Edit3, Check, X, Copy, Tag, RefreshCw,
   MoreHorizontal, Lock, Unlock, Minimize2, Maximize2, ChevronDown,
-  Smartphone, Globe, ArrowRight, Layers, Pencil, Server, MonitorDot, Terminal, Database, Code2, Link2
+  Smartphone, Globe, ArrowRight, Layers, Pencil, Server, MonitorDot, Terminal, Database, Code2, Link2,
+  Cpu
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { generateFullPageVariations, getRandomVariation, generateSubSections } from './generateVariations';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { VisualEditor } from './VisualEditor';
 import { ApiVisualEditor } from './ApiVisualEditor';
 import { CliVisualEditor } from './CliVisualEditor';
@@ -49,6 +57,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
     selectedNodeId, selectNode, startDrag, updateNode, removeNode, duplicateNode,
     togglePick, connectingFromId, startConnecting, finishConnecting,
     addNode, connectNodes, setPan, setZoom, zoom, panX, panY,
+    aiModel, setAiModel,
   } = useCanvasStore();
 
   const isSelected = selectedNodeId === node.id;
@@ -478,6 +487,29 @@ export const CanvasNodeCard = ({ node }: Props) => {
 
               {/* Actions */}
               <div className="flex gap-1.5 flex-wrap">
+                {/* AI Model Picker - Shown for nodes capable of generation */}
+                {((node.type === 'idea') || 
+                  (node.type === 'design' && node.status === 'ready' && node.platform)) && !showVisualEditor && !showCodeEditor && (
+                  <div className="w-full space-y-1.5 mb-1.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5 px-1">
+                      <Cpu className="w-3 h-3 text-primary" />
+                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">AI Model</p>
+                    </div>
+                    <Select value={aiModel} onValueChange={setAiModel}>
+                      <SelectTrigger className="w-full bg-secondary/30 border-border h-9 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-secondary/50 transition-all border-dashed">
+                        <SelectValue placeholder="Select Model" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border-border bg-card shadow-2xl overflow-hidden">
+                        <SelectItem value="auto" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Auto (Balanced)</SelectItem>
+                        <SelectItem value="claude" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Claude 3.5 Sonnet</SelectItem>
+                        <SelectItem value="gemini" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Gemini 1.5 Pro</SelectItem>
+                        <SelectItem value="gemini-flash" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Gemini 1.5 Flash</SelectItem>
+                        <SelectItem value="gpt-4o" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">GPT-4o High Speed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 {/* IDEA node: Generate with platform picker */}
                 {node.type === 'idea' && node.status === 'idle' && !showPlatformPicker && (
                   <button onClick={(e) => { e.stopPropagation(); setShowPlatformPicker(true); }} className="brand-button flex-1 flex items-center justify-center gap-2 !py-3">

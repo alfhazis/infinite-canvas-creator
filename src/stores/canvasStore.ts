@@ -58,6 +58,7 @@ interface CanvasState {
   dragNodeId: string | null;
   dragOffset: { x: number; y: number };
   darkMode: boolean;
+  aiModel: string;
 
   // Preview selection
   previewPanelOpen: boolean;
@@ -83,6 +84,7 @@ interface CanvasState {
   endDrag: () => void;
   connectNodes: (fromId: string, toId: string) => void;
   toggleDarkMode: () => void;
+  setAiModel: (model: string) => void;
   togglePick: (id: string) => void;
   getPickedNodes: () => CanvasNode[];
   openPreviewPanel: (sourceNodeId: string, variations: UIVariation[]) => void;
@@ -106,6 +108,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   dragNodeId: null,
   dragOffset: { x: 0, y: 0 },
   darkMode: false,
+  aiModel: 'auto',
   previewPanelOpen: false,
   previewVariations: [],
   previewSourceNodeId: null,
@@ -188,6 +191,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   clearAll: () => set({ nodes: [], selectedNodeId: null }),
 
   toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+
+  setAiModel: (model: string) => set({ aiModel: model }),
 
   togglePick: (id) =>
     set((state) => ({
