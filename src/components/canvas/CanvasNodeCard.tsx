@@ -21,6 +21,7 @@ import { VisualEditor } from './VisualEditor';
 import { ApiVisualEditor } from './ApiVisualEditor';
 import { CliVisualEditor } from './CliVisualEditor';
 import { DatabaseVisualEditor } from './DatabaseVisualEditor';
+import { PaymentVisualEditor } from './PaymentVisualEditor';
 import { CodeEditor } from './CodeEditor';
 
 const typeConfig: Record<CanvasNode['type'], { icon: typeof Sparkles; gradient: string; label: string }> = {
@@ -31,6 +32,7 @@ const typeConfig: Record<CanvasNode['type'], { icon: typeof Sparkles; gradient: 
   api: { icon: Server, gradient: 'from-rose-500/20 to-pink-500/20', label: 'API' },
   cli: { icon: Terminal, gradient: 'from-emerald-500/20 to-lime-500/20', label: 'CLI' },
   database: { icon: Database, gradient: 'from-cyan-500/20 to-blue-500/20', label: 'Database' },
+  payment: { icon: CreditCard, gradient: 'from-emerald-500/20 to-emerald-600/20', label: 'Payment' },
 };
 
 const statusColors: Record<CanvasNode['status'], string> = {
@@ -691,6 +693,11 @@ export const CanvasNodeCard = ({ node }: Props) => {
                     <Database className="w-4 h-4" />
                   </button>
                 )}
+                {node.type === 'payment' && (
+                  <button onMouseDown={(e) => e.stopPropagation()} onClick={handleVisualEdit} className="p-3 rounded-xl border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all" title="Payment Manager">
+                    <CreditCard className="w-4 h-4" />
+                  </button>
+                )}
 
                 {/* Code Editor - for all node types */}
                 {node.type !== 'idea' && (
@@ -732,7 +739,11 @@ export const CanvasNodeCard = ({ node }: Props) => {
         <DatabaseVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
         document.body
       )}
-      {showVisualEditor && node.type !== 'api' && node.type !== 'cli' && node.type !== 'database' && createPortal(
+      {showVisualEditor && node.type === 'payment' && createPortal(
+        <PaymentVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
+        document.body
+      )}
+      {showVisualEditor && node.type !== 'api' && node.type !== 'cli' && node.type !== 'database' && node.type !== 'payment' && createPortal(
         <VisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
         document.body
       )}

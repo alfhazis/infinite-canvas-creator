@@ -4,7 +4,8 @@ import {
   Sparkles, Upload, ZoomIn, ZoomOut, Maximize2,
   Search, X, Layers, Moon, Sun, Copy, Trash2,
   Code, FileCode, Grid3X3, Keyboard, Download, Eye, Package,
-  Plus, Globe, Smartphone, Server, Terminal, Database, Monitor, ChevronUp
+  Plus, Globe, Smartphone, Server, Terminal, Database, Monitor, ChevronUp,
+  CreditCard
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 
@@ -396,6 +397,7 @@ export const CanvasToolbar = () => {
                     { icon: Terminal, label: 'CLI Tool', platform: 'cli' as const, type: 'cli' as const, desc: 'A command-line interface tool node.' },
                     { icon: Monitor, label: 'Desktop App', platform: 'desktop' as const, type: 'design' as const, desc: 'A desktop application node (Electron/Tauri).' },
                     { icon: Database, label: 'Database', platform: 'database' as const, type: 'database' as const, desc: 'A database schema designer node.' },
+                    { icon: CreditCard, label: 'Payment', platform: 'web' as const, type: 'payment' as const, desc: 'A payment and subscription management node.' },
                   ].map((item) => (
                     <button
                       key={item.label}

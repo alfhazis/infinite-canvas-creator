@@ -13,7 +13,7 @@ export interface ElementLink {
 
 export interface CanvasNode {
   id: string;
-  type: 'idea' | 'design' | 'code' | 'import' | 'api' | 'cli' | 'database';
+  type: 'idea' | 'design' | 'code' | 'import' | 'api' | 'cli' | 'database' | 'payment';
   title: string;
   description: string;
   x: number;
