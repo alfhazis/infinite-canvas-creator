@@ -1,9 +1,11 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type)]
+/// Category of UI variation for assembly purposes
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, ToSchema)]
 #[sqlx(type_name = "variation_category", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum VariationCategory {
@@ -16,7 +18,8 @@ pub enum VariationCategory {
     Mobile,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+/// A generated UI variation for a source node
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UiVariation {
     pub id: Uuid,
@@ -30,14 +33,16 @@ pub struct UiVariation {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize)]
+/// Save multiple UI variations for a node
+#[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveVariationsRequest {
     pub source_node_client_id: String,
     pub variations: Vec<VariationPayload>,
 }
 
-#[derive(Debug, Deserialize)]
+/// A single variation payload to save
+#[derive(Debug, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct VariationPayload {
     pub label: String,

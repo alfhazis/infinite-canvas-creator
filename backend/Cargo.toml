@@ -13,6 +13,9 @@ axum-extra = { version = "0.9", features = ["typed-header"] }
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "trace"] }
 
+utoipa = { version = "4", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "6", features = ["axum"] }
+
 tokio = { version = "1", features = ["full"] }
 
 sqlx = { version = "0.7", features = [

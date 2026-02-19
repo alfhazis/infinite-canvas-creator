@@ -271,6 +271,8 @@ pub async fn load_canvas(
                 element_links,
                 env_vars,
                 connected_to,
+                created_at: n.created_at,
+                updated_at: n.updated_at,
             }
         })
         .collect();
