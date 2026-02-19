@@ -101,6 +101,7 @@ interface CanvasState {
   finishConnecting: (toId: string) => void;
   cancelConnecting: () => void;
   disconnectNodes: (fromId: string, toId: string) => void;
+  disconnectElementLink: (sourceNodeId: string, targetNodeId: string) => void;
 }
 
 let nodeCounter = 0;
@@ -183,6 +184,15 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       nodes: state.nodes.map((n) =>
         n.id === fromId
           ? { ...n, connectedTo: n.connectedTo.filter((c) => c !== toId) }
+          : n
+      ),
+    })),
+
+  disconnectElementLink: (sourceId, targetId) =>
+    set((state) => ({
+      nodes: state.nodes.map((n) =>
+        n.id === sourceId
+          ? { ...n, elementLinks: n.elementLinks?.filter((l) => l.targetNodeId !== targetId) }
           : n
       ),
     })),

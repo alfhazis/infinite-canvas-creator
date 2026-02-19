@@ -1,16 +1,21 @@
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 
 interface Connection {
   x1: number; y1: number; x2: number; y2: number;
   key: string;
+  sourceId: string;
+  targetId: string;
   elementLabel?: string;
   isElementLink?: boolean;
 }
 
 export const CanvasConnections = () => {
   const nodes = useCanvasStore((s) => s.nodes);
+  const { disconnectNodes, disconnectElementLink } = useCanvasStore();
   const [renderedHeights, setRenderedHeights] = useState<Record<string, number>>({});
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   // Observe actual rendered heights of node cards
   useEffect(() => {
@@ -54,6 +59,8 @@ export const CanvasConnections = () => {
       connections.push({
         x1, y1, x2, y2,
         key: `el-${node.id}-${link.targetNodeId}-${idx}`,
+        sourceId: node.id,
+        targetId: link.targetNodeId,
         elementLabel: `${link.label}${link.elementType ? ` (${link.elementType})` : ''}`,
         isElementLink: true,
       });
@@ -78,14 +85,14 @@ export const CanvasConnections = () => {
       const x2 = target.x;
       const y2 = target.y + targetH / 2;
 
-      connections.push({ x1, y1, x2, y2, key: `${node.id}-${targetId}` });
+      connections.push({ x1, y1, x2, y2, key: `${node.id}-${targetId}`, sourceId: node.id, targetId });
     });
   });
 
   if (connections.length === 0) return null;
 
   return (
-    <svg className="absolute pointer-events-none" style={{ left: 0, top: 0, width: 9999, height: 9999, overflow: 'visible' }}>
+    <svg className="absolute" style={{ left: 0, top: 0, width: 9999, height: 9999, overflow: 'visible', pointerEvents: 'none' }}>
       <defs>
         <linearGradient id="conn-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="hsl(239 84% 67% / 0.5)" />
@@ -118,33 +125,65 @@ export const CanvasConnections = () => {
         const midX = (c.x1 + c.x2) / 2;
         const midY = (c.y1 + c.y2) / 2;
 
-        if (c.isElementLink) {
-          return (
-            <g key={c.key}>
-              <path d={path} fill="none" stroke="hsl(340 80% 55% / 0.04)" strokeWidth={8} filter="url(#conn-glow)" />
-              <path d={path} fill="none" stroke="url(#el-conn-gradient)" strokeWidth={1.5} strokeDasharray="6 4" markerEnd="url(#el-arrowhead)" strokeLinecap="round" />
-              <circle r="2.5" fill="hsl(340 80% 55% / 0.8)">
-                <animateMotion dur={dur} repeatCount="indefinite" path={path} />
-              </circle>
-              {c.elementLabel && (
-                <g transform={`translate(${midX}, ${midY})`}>
-                  <rect x={-c.elementLabel.length * 3.2 - 8} y={-18} width={c.elementLabel.length * 6.4 + 16} height={20} rx="6" fill="hsl(340 80% 55% / 0.15)" stroke="hsl(340 80% 55% / 0.3)" strokeWidth="0.5" />
-                  <text textAnchor="middle" y={-5} fill="hsl(340 80% 55%)" fontSize="9" fontWeight="900" letterSpacing="0.05em" style={{ textTransform: 'uppercase' }}>
-                    {c.elementLabel}
-                  </text>
-                </g>
-              )}
-            </g>
-          );
-        }
+        const isHovered = hoveredKey === c.key;
+
+        const handleDelete = (e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (c.isElementLink) {
+            disconnectElementLink(c.sourceId, c.targetId);
+          } else {
+            disconnectNodes(c.sourceId, c.targetId);
+          }
+        };
 
         return (
-          <g key={c.key}>
-            <path d={path} fill="none" stroke="hsl(239 84% 67% / 0.04)" strokeWidth={8} filter="url(#conn-glow)" />
-            <path d={path} fill="none" stroke="url(#conn-gradient)" strokeWidth={1} markerEnd="url(#arrowhead)" strokeLinecap="round" />
-            <circle r="2.5" fill="hsl(239 84% 67% / 0.7)">
-              <animateMotion dur={dur} repeatCount="indefinite" path={path} />
-            </circle>
+          <g 
+            key={c.key} 
+            className="group" 
+            style={{ pointerEvents: 'auto' }}
+            onMouseEnter={() => setHoveredKey(c.key)}
+            onMouseLeave={() => setHoveredKey(null)}
+          >
+            {/* Interaction buffer */}
+            <path d={path} fill="none" stroke="transparent" strokeWidth={20} className="cursor-pointer" />
+            
+            {c.isElementLink ? (
+              <>
+                <path d={path} fill="none" stroke="hsl(340 80% 55% / 0.04)" strokeWidth={isHovered ? 12 : 8} filter="url(#conn-glow)" className="transition-all" />
+                <path d={path} fill="none" stroke="url(#el-conn-gradient)" strokeWidth={isHovered ? 2.5 : 1.5} strokeDasharray="6 4" markerEnd="url(#el-arrowhead)" strokeLinecap="round" className="transition-all" />
+                <circle r="2.5" fill="hsl(340 80% 55% / 0.8)">
+                  <animateMotion dur={dur} repeatCount="indefinite" path={path} />
+                </circle>
+                {c.elementLabel && (
+                  <g transform={`translate(${midX}, ${midY})`} className="pointer-events-none">
+                    <rect x={-c.elementLabel.length * 3.2 - 8} y={-18} width={c.elementLabel.length * 6.4 + 16} height={20} rx="6" fill="hsl(340 80% 55% / 0.15)" stroke="hsl(340 80% 55% / 0.3)" strokeWidth="0.5" />
+                    <text textAnchor="middle" y={-5} fill="hsl(340 80% 55%)" fontSize="9" fontWeight="900" letterSpacing="0.05em" style={{ textTransform: 'uppercase' }}>
+                      {c.elementLabel}
+                    </text>
+                  </g>
+                )}
+              </>
+            ) : (
+              <>
+                <path d={path} fill="none" stroke="hsl(239 84% 67% / 0.04)" strokeWidth={isHovered ? 12 : 8} filter="url(#conn-glow)" className="transition-all" />
+                <path d={path} fill="none" stroke="url(#conn-gradient)" strokeWidth={isHovered ? 2 : 1} markerEnd="url(#arrowhead)" strokeLinecap="round" className="transition-all" />
+                <circle r="2.5" fill="hsl(239 84% 67% / 0.7)">
+                  <animateMotion dur={dur} repeatCount="indefinite" path={path} />
+                </circle>
+              </>
+            )}
+
+            {isHovered && (
+              <foreignObject x={midX - 12} y={midY - 12} width={24} height={24}>
+                <button
+                  onClick={handleDelete}
+                  className="w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-lg scale-110 active:scale-95"
+                  title="Remove connection"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </foreignObject>
+            )}
           </g>
         );
       })}

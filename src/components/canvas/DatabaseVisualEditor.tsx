@@ -616,6 +616,7 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
   // Drag-to-connect between tables
   const [connectingFrom, setConnectingFrom] = useState<{ tableId: string; columnId: string } | null>(null);
   const [connectMousePos, setConnectMousePos] = useState({ x: 0, y: 0 });
+  const [hoveredRelationId, setHoveredRelationId] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1039,21 +1040,51 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
               if (!path) return null;
               const color = getRelColor(rel);
               const isDashed = rel.type === 'many-to-many' || rel.type === 'bidirectional';
+              const isHovered = hoveredRelationId === rel.id;
+
+              const fromT = schema.tables.find(t => t.id === rel.fromTableId);
+              const toT = schema.tables.find(t => t.id === rel.toTableId);
+              if (!fromT || !toT) return null;
+
+              const fromColIdx = fromT.columns.findIndex(c => c.id === rel.fromColumnId);
+              const toColIdx = toT.columns.findIndex(c => c.id === rel.toColumnId);
+
+              // Correct midpoint calculation
+              const fromY = fromT.y + 44 + Math.max(0, fromColIdx) * 30 + 15;
+              const toY = toT.y + 44 + Math.max(0, toColIdx) * 30 + 15;
+              const fromCenterX = fromT.x + TABLE_WIDTH / 2;
+              const toCenterX = toT.x + TABLE_WIDTH / 2;
+              const fromX = fromCenterX <= toCenterX ? fromT.x + TABLE_WIDTH : fromT.x;
+              const toX = fromCenterX <= toCenterX ? toT.x : toT.x + TABLE_WIDTH;
+              
+              const midX = (fromX + toX) / 2;
+              const midY = (fromY + toY) / 2;
+
               return (
-                <g key={rel.id}>
+                <g 
+                  key={rel.id}
+                  style={{ pointerEvents: 'auto' }}
+                  onMouseEnter={() => setHoveredRelationId(rel.id)}
+                  onMouseLeave={() => setHoveredRelationId(null)}
+                >
+                  {/* Interaction buffer */}
+                  <path d={path} fill="none" stroke="transparent" strokeWidth={20} className="cursor-pointer" />
+                  
                   {/* Glow */}
-                  <path d={path} fill="none" stroke={color} strokeWidth={6} opacity={0.06} />
+                  <path d={path} fill="none" stroke={color} strokeWidth={isHovered ? 10 : 6} opacity={isHovered ? 0.12 : 0.06} className="transition-all" />
+                  
                   {/* Main line */}
                   <path
                     d={path}
                     fill="none"
                     stroke={color}
-                    strokeWidth={2}
+                    strokeWidth={isHovered ? 3 : 2}
                     strokeDasharray={isDashed ? '8 4' : 'none'}
-                    opacity={0.7}
+                    opacity={isHovered ? 1 : 0.7}
                     strokeLinecap="round"
                     markerEnd="url(#db-arrow)"
                     style={{ color }}
+                    className="transition-all"
                   />
                   {/* Animated dot */}
                   <circle r="3" fill={color} opacity={0.8}>
@@ -1061,20 +1092,28 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
                   </circle>
                   {/* Relation type label */}
                   {(() => {
-                    const fromT = schema.tables.find(t => t.id === rel.fromTableId);
-                    const toT = schema.tables.find(t => t.id === rel.toTableId);
-                    if (!fromT || !toT) return null;
-                    const mx = (fromT.x + TABLE_WIDTH + toT.x) / 2;
-                    const fromColIdx = fromT.columns.findIndex(c => c.id === rel.fromColumnId);
-                    const toColIdx = toT.columns.findIndex(c => c.id === rel.toColumnId);
-                    const my = ((fromT.y + 44 + Math.max(0, fromColIdx) * 30 + 15) + (toT.y + 44 + Math.max(0, toColIdx) * 30 + 15)) / 2;
                     const label = relTypes.find(r => r.value === rel.type)?.label || rel.type;
                     return (
-                      <text x={mx} y={my - 8} textAnchor="middle" fill={color} fontSize="9" fontWeight="bold" opacity={0.6}>
+                      <text x={midX} y={midY - 12} textAnchor="middle" fill={color} fontSize="9" fontWeight="bold" opacity={isHovered ? 1 : 0.6}>
                         {label}
                       </text>
                     );
                   })()}
+
+                  {isHovered && (
+                    <foreignObject x={midX - 10} y={midY - 10} width={20} height={20}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateSchema({ ...schema, relations: schema.relations.filter(r => r.id !== rel.id) });
+                        }}
+                        className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-lg scale-110 active:scale-95"
+                        title="Remove relation"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </foreignObject>
+                  )}
                 </g>
               );
             })}
