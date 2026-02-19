@@ -22,20 +22,25 @@ export function findFreePosition(
   let y = startY;
   
   // Simple heuristic: if there's an overlap, move down. 
-  // If we've moved too far down, move right and reset y.
-  // Actually, let's just move down until clear for now.
+  // If we've moved too far down (e.g. 1500px), move right and reset y.
   
   let found = false;
   let attempts = 0;
-  const maxAttempts = 100;
+  const maxAttempts = 500;
+  const maxVerticalOffset = 1500;
 
   while (!found && attempts < maxAttempts) {
     const overlapping = existingNodes.some(node => {
+      const nodeX = node.x;
+      const nodeY = node.y;
+      const nodeW = node.width || 360;
+      const nodeH = node.height || 300;
+      
       return (
-        x < node.x + node.width + padding &&
-        x + width + padding > node.x &&
-        y < node.y + node.height + padding &&
-        y + height + padding > node.y
+        x < nodeX + nodeW + padding &&
+        x + width + padding > nodeX &&
+        y < nodeY + nodeH + padding &&
+        y + height + padding > nodeY
       );
     });
 
@@ -45,8 +50,8 @@ export function findFreePosition(
       y += step;
       attempts++;
       
-      // If we move down too much (e.g. 5 nodes high), move right and try again from startY
-      if (attempts % 10 === 0) {
+      // If we move down too much, move right and try again from startY
+      if (y - startY > maxVerticalOffset) {
         x += width + padding;
         y = startY;
       }

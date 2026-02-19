@@ -82,6 +82,24 @@ export const CanvasNodeCard = ({ node }: Props) => {
   const [subUiPrompt, setSubUiPrompt] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Update node height in store when card resizes
+  useEffect(() => {
+    if (!cardRef.current || isCollapsed) return;
+    
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newHeight = Math.round(entry.contentRect.height + 40); // account for padding/header
+        if (Math.abs(newHeight - (node.height || 0)) > 10) {
+          updateNode(node.id, { height: newHeight });
+        }
+      }
+    });
+    
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [node.id, isCollapsed, updateNode, node.height]);
 
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
@@ -280,6 +298,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
       e.stopPropagation();
       updateNode(node.id, { status: 'running' });
       setTimeout(() => {
+        const latestNodes = useCanvasStore.getState().nodes;
         updateNode(node.id, { status: 'ready' });
         const previewHtml = buildRunPreview(node.title, node.description);
         
@@ -288,7 +307,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
         const padding = 80;
 
         const { x, y } = findFreePosition(
-          useCanvasStore.getState().nodes,
+          latestNodes,
           nodeWidth,
           nodeHeight,
           node.x + node.width + padding,
@@ -352,7 +371,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       onMouseDown={handleMouseDown}
     >
-      <div className={`node-card p-5 relative ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${node.picked ? 'ring-2 ring-emerald-500/60 ring-offset-2 ring-offset-background' : ''}`}>
+      <div ref={cardRef} className={`node-card p-5 relative ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${node.picked ? 'ring-2 ring-emerald-500/60 ring-offset-2 ring-offset-background' : ''}`}>
         
         {/* Connection handles - left */}
         <button

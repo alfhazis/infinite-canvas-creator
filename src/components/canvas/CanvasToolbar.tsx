@@ -153,8 +153,9 @@ export const CanvasToolbar = () => {
     const nodeHeight = 300;
     const padding = 60;
 
+    const currentNodes = useCanvasStore.getState().nodes;
     const { x, y } = findFreePosition(
-      nodes,
+      currentNodes,
       nodeWidth,
       nodeHeight,
       100,
@@ -174,15 +175,16 @@ export const CanvasToolbar = () => {
     });
     setIdeaText('');
     setShowIdeaInput(false);
-  }, [ideaText, nodes, addNode]);
+  }, [ideaText, addNode]);
 
   const handleAddPlatformNode = useCallback((platform: CanvasNode['platform'], type: CanvasNode['type'], title: string, desc: string) => {
     const nodeWidth = 360;
     const nodeHeight = 300;
     const padding = 60;
 
+    const currentNodes = useCanvasStore.getState().nodes;
     const { x, y } = findFreePosition(
-      nodes,
+      currentNodes,
       nodeWidth,
       nodeHeight,
       100,
@@ -202,7 +204,7 @@ export const CanvasToolbar = () => {
       platform,
     });
     setShowAddMenu(false);
-  }, [nodes, addNode]);
+  }, [addNode]);
 
   // Close add menu on outside click
   useEffect(() => {

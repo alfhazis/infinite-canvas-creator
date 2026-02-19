@@ -23,7 +23,8 @@ export const PreviewSelectionPanel = () => {
 
   const handleSelect = (variation: UIVariation) => {
     if (!previewSourceNodeId) return;
-    const sourceNode = nodes.find((n) => n.id === previewSourceNodeId);
+    const currentNodes = useCanvasStore.getState().nodes;
+    const sourceNode = currentNodes.find((n) => n.id === previewSourceNodeId);
     if (!sourceNode) return;
 
     const nodeWidth = 380;
@@ -31,7 +32,7 @@ export const PreviewSelectionPanel = () => {
     const padding = 80;
 
     const { x, y } = findFreePosition(
-      nodes,
+      currentNodes,
       nodeWidth,
       nodeHeight,
       sourceNode.x + sourceNode.width + padding,
@@ -66,8 +67,9 @@ export const PreviewSelectionPanel = () => {
     
     // However, since addNode is async-ish (zustand state update), 
     // let's do it with a local copy of nodes to ensure no overlap between the new ones
-    let currentNodes = [...nodes];
-    const sourceNode = nodes.find((n) => n.id === previewSourceNodeId);
+    const nodesFromStore = useCanvasStore.getState().nodes;
+    let currentNodes = [...nodesFromStore];
+    const sourceNode = nodesFromStore.find((n) => n.id === previewSourceNodeId);
     if (!sourceNode) return;
 
     const nodeWidth = 380;
