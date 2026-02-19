@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X, Key, Shield, ChevronDown, Check, Globe, Zap, AlertCircle } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { fetchOpenRouterModels } from '@/lib/openrouter';
+import { ModelSelector } from './ModelSelector';
 
 export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
   const { openRouterKey, setOpenRouterKey, aiModel, setAiModel, availableModels, setAvailableModels } = useCanvasStore();
@@ -116,49 +117,7 @@ export const SettingsModal = ({ onClose }: { onClose: () => void }) => {
             </div>
 
             <div className="grid gap-2">
-              <button
-                onClick={() => setAiModel('auto')}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
-                  aiModel === 'auto' 
-                    ? 'bg-primary/5 border-primary text-foreground shadow-sm' 
-                    : 'bg-secondary/30 border-border text-muted-foreground hover:border-primary/30'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Zap className={`w-4 h-4 ${aiModel === 'auto' ? 'text-primary' : ''}`} />
-                  <div className="text-left">
-                    <p className="text-xs font-black uppercase tracking-tight">Auto Select</p>
-                    <p className="text-[9px] font-medium opacity-60">Uses built-in templates</p>
-                  </div>
-                </div>
-                {aiModel === 'auto' && <Check className="w-4 h-4 text-primary" />}
-              </button>
-
-              <div className="max-h-[200px] overflow-y-auto pr-1 space-y-2">
-                {availableModels.filter(m => m.free).map((model) => (
-                  <button
-                    key={model.id}
-                    onClick={() => setAiModel(model.id)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
-                      aiModel === model.id 
-                        ? 'bg-primary/5 border-primary text-foreground shadow-sm' 
-                        : 'bg-secondary/30 border-border text-muted-foreground hover:border-primary/30'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${model.free ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-primary'}`} />
-                      <div className="text-left">
-                        <p className="text-xs font-black uppercase tracking-tight truncate max-w-[240px]">{model.name}</p>
-                        <p className="text-[9px] font-medium opacity-60 truncate max-w-[240px]">{model.id}</p>
-                      </div>
-                    </div>
-                    {aiModel === model.id && <Check className="w-4 h-4 text-primary" />}
-                    {model.free && aiModel !== model.id && (
-                      <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Free</span>
-                    )}
-                  </button>
-                ))}
-              </div>
+              <ModelSelector className="!h-12 !text-xs" />
             </div>
 
             {error && (

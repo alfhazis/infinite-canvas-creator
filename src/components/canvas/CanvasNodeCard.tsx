@@ -11,19 +11,13 @@ import {
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { generateFullPageVariations, getRandomVariation, generateSubSections, generateFullPageWithAI, generateSubSectionsWithAI } from './generateVariations';
 import { findFreePosition } from '@/lib/layout';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { VisualEditor } from './VisualEditor';
 import { ApiVisualEditor } from './ApiVisualEditor';
 import { CliVisualEditor } from './CliVisualEditor';
 import { DatabaseVisualEditor } from './DatabaseVisualEditor';
 import { PaymentVisualEditor } from './PaymentVisualEditor';
 import { CodeEditor } from './CodeEditor';
+import { ModelSelector } from './ModelSelector';
 
 const typeConfig: Record<CanvasNode['type'], { icon: typeof Sparkles; gradient: string; label: string }> = {
   idea: { icon: Sparkles, gradient: 'from-indigo-500/20 to-violet-500/20', label: 'Idea' },
@@ -611,31 +605,7 @@ export const CanvasNodeCard = ({ node }: Props) => {
                       <Cpu className="w-3 h-3 text-primary" />
                       <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">AI Model</p>
                     </div>
-                    <Select value={aiModel} onValueChange={setAiModel}>
-                      <SelectTrigger className="w-full bg-secondary/30 border-border h-9 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-secondary/50 transition-all border-dashed">
-                        <SelectValue placeholder="Select Model" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-2xl border-border bg-card shadow-2xl overflow-hidden max-h-[300px]">
-                        <SelectItem value="auto" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Auto (Balanced)</SelectItem>
-                        {availableModels.length > 0 ? (
-                          availableModels.map((model) => (
-                            <SelectItem key={model.id} value={model.id} className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">
-                              <div className="flex items-center gap-1.5 overflow-hidden w-full">
-                                {model.free && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />}
-                                <span className="truncate">{model.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <>
-                            <SelectItem value="claude" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Claude 3.5 Sonnet</SelectItem>
-                            <SelectItem value="gemini" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Gemini 1.5 Pro</SelectItem>
-                            <SelectItem value="gemini-flash" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">Gemini 1.5 Flash</SelectItem>
-                            <SelectItem value="gpt-4o" className="text-[10px] font-bold uppercase tracking-widest focus:bg-primary/10">GPT-4o High Speed</SelectItem>
-                          </>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <ModelSelector />
                   </div>
                 )}
 
