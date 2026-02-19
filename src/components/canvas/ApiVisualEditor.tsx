@@ -229,7 +229,13 @@ interface Props {
 }
 
 export const ApiVisualEditor = ({ node, onClose }: Props) => {
-  const { updateNode } = useCanvasStore();
+  const { updateNode, nodes } = useCanvasStore();
+  
+  // Find environment variables from connected nodes
+  const connectedEnvVars = nodes
+    .filter(n => n.type === 'env' && (node.connectedTo.includes(n.id) || n.connectedTo.includes(node.id)))
+    .reduce((acc, n) => ({ ...acc, ...(n.envVars || {}) }), {} as Record<string, string>);
+
   const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(() => {
     const parsed = parseEndpoints(node.generatedCode);
     return parsed.length > 0 ? parsed : [defaultEndpoint()];
@@ -470,6 +476,41 @@ export const ApiVisualEditor = ({ node, onClose }: Props) => {
             </div>
             <ScrollArea className="flex-1">
               <div className="px-2 pb-3 space-y-1">
+                {/* Connected Environment Variables */}
+                {Object.keys(connectedEnvVars).length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                      <Key className="w-3 h-3" />
+                      Environment
+                    </div>
+                    <div className="space-y-0.5 ml-1">
+                      {Object.entries(connectedEnvVars).map(([key, value]) => (
+                        <div
+                          key={key}
+                          draggable
+                          onDragStart={(e) => {
+                            const element: ApiElement = {
+                              id: `env-${key}`,
+                              label: key,
+                              icon: Key,
+                              category: 'Environment',
+                              createParam: { key, type: 'string', required: true, description: `Env: ${key}`, target: 'headers' }
+                            };
+                            e.dataTransfer.setData('application/api-element', JSON.stringify(element));
+                          }}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-300 transition-all cursor-grab active:cursor-grabbing group"
+                        >
+                          <Key className="w-3 h-3 shrink-0" />
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[10px] font-bold truncate tracking-tight">{key}</span>
+                            <span className="text-[8px] opacity-50 truncate">process.env.{key}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {categories.map(cat => {
                   const items = filteredElements.filter(el => el.category === cat);
                   if (items.length === 0) return null;

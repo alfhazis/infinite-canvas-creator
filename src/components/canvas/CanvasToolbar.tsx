@@ -5,7 +5,7 @@ import {
   Search, X, Layers, Moon, Sun, Copy, Trash2,
   Code, FileCode, Grid3X3, Keyboard, Download, Eye, Package,
   Plus, Globe, Smartphone, Server, Terminal, Database, Monitor, ChevronUp,
-  CreditCard, Settings
+  CreditCard, Settings, Key
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { findFreePosition } from '@/lib/layout';
@@ -446,6 +446,7 @@ export const CanvasToolbar = () => {
                     { icon: Monitor, label: 'Desktop App', platform: 'desktop' as const, type: 'design' as const, desc: 'A desktop application node (Electron/Tauri).' },
                     { icon: Database, label: 'Database', platform: 'database' as const, type: 'database' as const, desc: 'A database schema designer node.' },
                     { icon: CreditCard, label: 'Payment', platform: 'web' as const, type: 'payment' as const, desc: 'A payment and subscription management node.' },
+                    { icon: Key, label: 'Environment', platform: 'env' as const, type: 'env' as const, desc: 'A node for environment variables and configuration.' },
                   ].map((item) => (
                     <button
                       key={item.label}

@@ -5,7 +5,7 @@ import {
   Terminal, Play, ArrowRight, ArrowDown, PanelLeft, GripVertical, Search,
   Type, FileOutput, GitBranch, Repeat, Variable, Braces, FolderOpen,
   AlertCircle, CheckCircle, HelpCircle, Flag, Loader2, Settings,
-  FileText, Database, Globe, Clock, Shield, Zap, Hash, List,
+  FileText, Database, Globe, Clock, Shield, Zap, Hash, List, Key
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -262,7 +262,13 @@ const configFieldLabels: Partial<Record<string, string>> = {
 interface Props { node: CanvasNode; onClose: () => void; }
 
 export const CliVisualEditor = ({ node, onClose }: Props) => {
-  const { updateNode } = useCanvasStore();
+  const { updateNode, nodes } = useCanvasStore();
+
+  // Find environment variables from connected nodes
+  const connectedEnvVars = nodes
+    .filter(n => n.type === 'env' && (node.connectedTo.includes(n.id) || n.connectedTo.includes(node.id)))
+    .reduce((acc, n) => ({ ...acc, ...(n.envVars || {}) }), {} as Record<string, string>);
+
   const [steps, setSteps] = useState<CliStep[]>(() => {
     const parsed = parseSteps(node.generatedCode);
     return parsed.length > 0 ? parsed : [];
@@ -445,6 +451,42 @@ export const CliVisualEditor = ({ node, onClose }: Props) => {
             </div>
             <ScrollArea className="flex-1">
               <div className="p-2 space-y-1">
+                {/* Connected Environment Variables */}
+                {Object.keys(connectedEnvVars).length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                      <Key className="w-3 h-3" />
+                      Environment
+                    </div>
+                    <div className="space-y-0.5 ml-1">
+                      {Object.entries(connectedEnvVars).map(([key, value]) => (
+                        <div
+                          key={key}
+                          draggable
+                          onDragStart={(e) => {
+                            const el: CliElement = {
+                              id: `env-${key}`,
+                              label: key,
+                              icon: Key,
+                              category: 'Environment',
+                              kind: 'env-var',
+                              defaultConfig: { name: key, fallback: value, required: 'true' }
+                            };
+                            e.dataTransfer.setData('application/cli-element', JSON.stringify(el));
+                          }}
+                          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-grab hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-300 transition-all group"
+                        >
+                          <Key className="w-3.5 h-3.5 shrink-0" />
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[10px] font-semibold truncate">{key}</span>
+                            <span className="text-[8px] opacity-50 truncate">process.env.{key}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {categories.map(cat => {
                   const items = filteredElements.filter(el => el.category === cat);
                   if (items.length === 0) return null;

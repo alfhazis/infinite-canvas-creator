@@ -14,7 +14,7 @@ export interface ElementLink {
 
 export interface CanvasNode {
   id: string;
-  type: 'idea' | 'design' | 'code' | 'import' | 'api' | 'cli' | 'database' | 'payment';
+  type: 'idea' | 'design' | 'code' | 'import' | 'api' | 'cli' | 'database' | 'payment' | 'env';
   title: string;
   description: string;
   x: number;
@@ -33,11 +33,13 @@ export interface CanvasNode {
   /** color tag for visual grouping */
   tag?: string;
   /** platform target */
-  platform?: 'web' | 'mobile' | 'api' | 'desktop' | 'cli' | 'database';
+  platform?: 'web' | 'mobile' | 'api' | 'desktop' | 'cli' | 'database' | 'env';
   /** element-to-node links within the visual editor */
   elementLinks?: ElementLink[];
   /** programming language for API/CLI nodes */
   language?: string;
+  /** environment variables for env nodes */
+  envVars?: Record<string, string>;
 }
 
 export interface UIVariation {

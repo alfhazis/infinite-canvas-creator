@@ -6,7 +6,7 @@ import {
   Edit3, Check, X, Copy, Tag, RefreshCw,
   MoreHorizontal, Lock, Unlock, Minimize2, Maximize2, ChevronDown,
   Smartphone, Globe, ArrowRight, Layers, Pencil, Server, MonitorDot, Terminal, Database, Code2, Link2,
-  Cpu, CreditCard
+  Cpu, CreditCard, Key
 } from 'lucide-react';
 import { useCanvasStore, type CanvasNode } from '@/stores/canvasStore';
 import { generateFullPageVariations, getRandomVariation, generateSubSections, generateFullPageWithAI, generateSubSectionsWithAI } from './generateVariations';
@@ -16,6 +16,7 @@ import { ApiVisualEditor } from './ApiVisualEditor';
 import { CliVisualEditor } from './CliVisualEditor';
 import { DatabaseVisualEditor } from './DatabaseVisualEditor';
 import { PaymentVisualEditor } from './PaymentVisualEditor';
+import { EnvVisualEditor } from './EnvVisualEditor';
 import { CodeEditor } from './CodeEditor';
 import { ModelSelector } from './ModelSelector';
 
@@ -28,6 +29,7 @@ const typeConfig: Record<CanvasNode['type'], { icon: typeof Sparkles; gradient: 
   cli: { icon: Terminal, gradient: 'from-emerald-500/20 to-lime-500/20', label: 'CLI' },
   database: { icon: Database, gradient: 'from-cyan-500/20 to-blue-500/20', label: 'Database' },
   payment: { icon: CreditCard, gradient: 'from-emerald-500/20 to-emerald-600/20', label: 'Payment' },
+  env: { icon: Key, gradient: 'from-emerald-500/20 to-teal-500/20', label: 'Environment' },
 };
 
 const statusColors: Record<CanvasNode['status'], string> = {
@@ -832,6 +834,11 @@ export const CanvasNodeCard = ({ node }: Props) => {
                     <CreditCard className="w-4 h-4" />
                   </button>
                 )}
+                {node.type === 'env' && (
+                  <button onMouseDown={(e) => e.stopPropagation()} onClick={handleVisualEdit} className="p-3 rounded-xl border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all" title="Env Manager">
+                    <Key className="w-4 h-4" />
+                  </button>
+                )}
 
                 {/* Code Editor - for all node types */}
                 {node.type !== 'idea' && (
@@ -875,6 +882,20 @@ export const CanvasNodeCard = ({ node }: Props) => {
       )}
       {showVisualEditor && node.type === 'payment' && createPortal(
         <PaymentVisualEditor node={node} onClose={() => setShowVisualEditor(false)} />,
+        document.body
+      )}
+      {showVisualEditor && node.type === 'env' && createPortal(
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-3xl shadow-2xl w-full max-w-lg h-[500px] flex flex-col relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setShowVisualEditor(false)}
+              className="absolute top-4 right-4 p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-all z-10"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <EnvVisualEditor nodeId={node.id} />
+          </div>
+        </div>,
         document.body
       )}
       {showVisualEditor && node.type !== 'api' && node.type !== 'cli' && node.type !== 'database' && node.type !== 'payment' && createPortal(

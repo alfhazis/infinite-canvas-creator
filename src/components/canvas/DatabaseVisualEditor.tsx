@@ -573,7 +573,13 @@ function generatePreviewHtml(tables: DbTable[], relations: DbRelation[], title: 
 interface Props { node: CanvasNode; onClose: () => void; }
 
 export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
-  const { updateNode } = useCanvasStore();
+  const { updateNode, nodes } = useCanvasStore();
+
+  // Find environment variables from connected nodes
+  const connectedEnvVars = nodes
+    .filter(n => n.type === 'env' && (node.connectedTo.includes(n.id) || n.connectedTo.includes(node.id)))
+    .reduce((acc, n) => ({ ...acc, ...(n.envVars || {}) }), {} as Record<string, string>);
+
   const [dbEngine, setDbEngine] = useState<DbEngine>(() => {
     const parsed = parseSchema(node.generatedCode);
     return parsed.engine || 'sql';
@@ -934,6 +940,31 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-2">
+                  {/* Connected Environment Variables */}
+                  {Object.keys(connectedEnvVars).length > 0 && (
+                    <div className="mb-4 px-1">
+                      <div className="flex items-center gap-2 px-2 py-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                        <Key className="w-3 h-3" />
+                        Environment
+                      </div>
+                      <div className="space-y-0.5 ml-1">
+                        {Object.entries(connectedEnvVars).map(([key, value]) => (
+                          <div
+                            key={key}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-300 transition-all group"
+                            title={value}
+                          >
+                            <Key className="w-3 h-3 shrink-0" />
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[10px] font-bold truncate tracking-tight">{key}</span>
+                              <span className="text-[8px] opacity-50 truncate">process.env.{key}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+              
                   {filteredCategories.map(cat => {
                     const items = filteredElements.filter(e => e.category === cat);
                     if (items.length === 0) return null;
