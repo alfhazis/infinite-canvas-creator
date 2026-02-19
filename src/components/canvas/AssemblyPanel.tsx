@@ -70,7 +70,7 @@ export const AssemblyPanel = () => {
             initial={{ x: -40 }}
             animate={{ x: 0 }}
           >
-            <div className="px-6 py-11 border-b border-border">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-black tracking-tight uppercase text-foreground">Assembly</h2>
                 <button onClick={() => setAssemblyPanelOpen(false)} className="p-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors">
@@ -88,7 +88,7 @@ export const AssemblyPanel = () => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {orderedPicked.length === 0 && (
                 <div className="text-center py-12">
                   <p className="brand-description">No sections picked yet.</p>
@@ -122,7 +122,7 @@ export const AssemblyPanel = () => {
             </div>
 
             {/* Actions */}
-            <div className="p-4 border-t border-border space-y-4">
+            <div className="p-4 border-t border-border space-y-2">
               <div className="flex gap-2">
                 <button
                   onClick={handleDownload}
@@ -169,7 +169,7 @@ export const AssemblyPanel = () => {
 
           {/* Right: Live preview */}
           <div className="flex-1 flex flex-col">
-            <div className="flex items-center gap-3 px-6 py-9 border-b border-border bg-card">
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-card">
               <Monitor className="w-5 h-5 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-widest text-foreground">Live Preview</span>
               <div className="flex gap-1 ml-4">

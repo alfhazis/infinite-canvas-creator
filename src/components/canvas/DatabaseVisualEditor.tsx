@@ -858,7 +858,7 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col" style={{ background: '#0a0a0f' }}>
       {/* ─── Top Bar ─── */}
-      <div className="flex items-center justify-between px-4 py-7 border-b border-white/10" style={{ background: '#0f0f15' }}>
+      <div className="flex items-center justify-between px-4 py-2 border-b border-white/10" style={{ background: '#0f0f15' }}>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowLeftPanel(!showLeftPanel)} className={`p-2 rounded-lg hover:bg-white/5 transition-colors ${showLeftPanel ? 'text-cyan-400' : 'text-white/30'}`} title="Toggle Elements">
             <PanelLeft className="w-4 h-4" />
@@ -1185,7 +1185,7 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
                 <button onClick={() => setShowRightPanel(false)} className="p-1 rounded-lg hover:bg-white/10 text-white/30 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
               </div>
               <ScrollArea className="flex-1">
-                <div className="p-3 space-y-6">
+                <div className="p-3 space-y-4">
                   {/* Table name */}
                   <div>
                     <label className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-1.5 block">{eLabel} Name</label>
@@ -1223,7 +1223,7 @@ export const DatabaseVisualEditor = ({ node, onClose }: Props) => {
                           <AnimatePresence>
                             {selectedColumnId === col.id && (
                               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                <div className="px-2 pb-2 space-y-3">
+                                <div className="px-2 pb-2 space-y-2">
                                   <input value={col.name} onChange={e => updateColumn(selectedTable.id, col.id, { name: e.target.value })} className="w-full px-2 py-1.5 rounded bg-white/5 border border-white/10 text-[11px] text-white outline-none focus:border-cyan-500/50" placeholder="Column name" />
                                   <select value={col.type} onChange={e => updateColumn(selectedTable.id, col.id, { type: e.target.value as ColumnType })} className="w-full px-2 py-1.5 rounded bg-white/5 border border-white/10 text-[11px] text-white outline-none focus:border-cyan-500/50">
                                     {columnTypes.map(t => <option key={t} value={t}>{t}</option>)}

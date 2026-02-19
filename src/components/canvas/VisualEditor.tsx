@@ -548,7 +548,7 @@ export const VisualEditor = ({ node, onClose }: Props) => {
       transition={{ duration: 0.2 }}
     >
       {/* Top toolbar */}
-      <div className="flex items-center justify-between px-4 py-7 border-b border-border bg-card/90 backdrop-blur shrink-0">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/90 backdrop-blur shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowLeftPanel(!showLeftPanel)}
@@ -806,7 +806,7 @@ export const VisualEditor = ({ node, onClose }: Props) => {
       </AnimatePresence>
 
       {/* Bottom status bar */}
-      <div className="flex items-center justify-between px-4 py-[26px] border-t border-border bg-card/90 backdrop-blur text-[9px] font-bold text-muted-foreground shrink-0">
+      <div className="flex items-center justify-between px-4 py-1.5 border-t border-border bg-card/90 backdrop-blur text-[9px] font-bold text-muted-foreground shrink-0">
         <div className="flex items-center gap-3">
           <span>
             {activeTool === 'select' ? 'Click to select' :
